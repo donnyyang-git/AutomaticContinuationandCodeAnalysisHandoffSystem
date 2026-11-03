@@ -1,0 +1,27 @@
+{
+  "kind": "environment-observation",
+  "observed_at": "2026-11-03T00:00:00.000Z",
+  "os": "Windows 10.0.22631",
+  "arch": "x64",
+  "java": {
+    "version": "1.8.0_91",
+    "vendor": "Oracle Corporation",
+    "status": "MISMATCH",
+    "required": "OpenJDK 21"
+  },
+  "maven": {
+    "version": "3.9.6",
+    "status": "MISMATCH",
+    "required": "3.10.0"
+  },
+  "ollama": {
+    "status": "MISSING",
+    "required": "0.40.14"
+  },
+  "models": [
+    {"tag": "qwen3:8b", "status": "MISSING"},
+    {"tag": "qwen3:14b", "status": "MISSING"}
+  ],
+  "overall_status": "NOT_READY",
+  "required_action": "Provision the locked environment and replace this observation with a schema-valid environment-manifest.json before POC-0."
+}

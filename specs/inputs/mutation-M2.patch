@@ -1,0 +1,11 @@
+--- a/src/main/resources/org/mybatis/jpetstore/mapper/OrderMapper.xml
++++ b/src/main/resources/org/mybatis/jpetstore/mapper/OrderMapper.xml
+@@ -97,7 +97,7 @@
+       CREDITCARD, EXPRDATE, CARDTYPE, LOCALE)
+     VALUES(#{orderId}, #{username}, #{orderDate}, #{shipAddress1}, #{shipAddress2,jdbcType=VARCHAR}, #{shipCity},
+       #{shipState}, #{shipZip}, #{shipCountry}, #{billAddress1}, #{billAddress2,jdbcType=VARCHAR}, #{billCity},
+-      #{billState}, #{billZip}, #{billCountry}, #{courier}, #{totalPrice}, #{billToFirstName}, #{billToLastName},
++      #{billState}, #{billZip}, #{billCountry}, #{courier}, ROUND(#{totalPrice}, 2), #{billToFirstName}, #{billToLastName},
+       #{shipToFirstName}, #{shipToLastName}, #{creditCard}, #{expiryDate}, #{cardType}, #{locale})
+   </insert>
+ 

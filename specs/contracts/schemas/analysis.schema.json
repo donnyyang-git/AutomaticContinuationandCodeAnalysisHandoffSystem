@@ -1,0 +1,12 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://handoff.local/schemas/analysis.schema.json",
+  "type":"object","additionalProperties":false,"required":["claims","unknowns","next_steps"],
+  "properties":{
+    "claims":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["logical_claim_id","claim_type","subject","claim","confidence","status","evidence_refs","reasoning"],"properties":{
+      "logical_claim_id":{"type":"string","format":"uuid"},"claim_type":{"enum":["ARCHITECTURE","RESPONSIBILITY","DATA_FLOW","CALL_RELATIONSHIP_INTERPRETATION","ENTRY_POINT","RISK"]},"subject":{"type":"string","minLength":1},"claim":{"type":"string","minLength":1},"confidence":{"enum":["HIGH","MEDIUM","LOW"]},"status":{"enum":["CONFIRMED","INFERRED","REQUIRES_REVIEW","UNSUPPORTED","CONFLICTING","UNKNOWN"]},"evidence_refs":{"type":"array","uniqueItems":true,"items":{"type":"string","format":"uuid"}},"reasoning":{"type":"string","minLength":1}
+    }}},
+    "unknowns":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["subject","reason"],"properties":{"subject":{"type":"string"},"reason":{"type":"string"}}}},
+    "next_steps":{"type":"array","items":{"type":"string"}}
+  }
+}

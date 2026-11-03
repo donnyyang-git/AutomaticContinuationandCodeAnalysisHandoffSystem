@@ -1,0 +1,191 @@
+{
+  "authoritative_files": [
+    {
+      "path": "CONTINUUM/README.md",
+      "sha256": "d5a63c3808d89fc1fc466dce0c82bdaa6dd0412eac0abd717ca06f164f16ab53",
+      "size_bytes": 5049
+    },
+    {
+      "path": "INDEX.md",
+      "sha256": "3f83e6b795096a335cd7c1532d38609b503a1cd3f78fb02275dcf77f5ac3d427",
+      "size_bytes": 1624
+    },
+    {
+      "path": "POC-0/README.md",
+      "sha256": "f265396f94a39a068ff5075ee642b974f88b52de216e19c915fb0eba9ff93774",
+      "size_bytes": 4678
+    },
+    {
+      "path": "POC-1/README.md",
+      "sha256": "422a579fd449f7cf6f05cc832cf044a335a3136895061f0aba0a158d3038116b",
+      "size_bytes": 3887
+    },
+    {
+      "path": "POC-2/README.md",
+      "sha256": "8e5365b9809abc96e9629b36f73b1ac9d34f2c288e3c1d7b17b101f69eb55558",
+      "size_bytes": 3659
+    },
+    {
+      "path": "POC-3/README.md",
+      "sha256": "a77ad78e07c571e72b11c94968a51acbf26a5d226ba706f5d116ab914270a995",
+      "size_bytes": 3976
+    },
+    {
+      "path": "POC-4/README.md",
+      "sha256": "a799df5b975226786b4da3f4190705b4324ff404e61e53be94f4c91688ae06c8",
+      "size_bytes": 3827
+    },
+    {
+      "path": "POC-5/README.md",
+      "sha256": "bbb4f7721a24621bf9683a0517914d7d781261a8735083f332ac3e659718f51a",
+      "size_bytes": 3614
+    },
+    {
+      "path": "contracts/CANONICAL-CONTRACTS.md",
+      "sha256": "b6e39de234a8eaad9888c492d925e4fb9abeda7b3f12175f114b6ca8c2e97dbc",
+      "size_bytes": 8856
+    },
+    {
+      "path": "contracts/ERROR-CATALOG.md",
+      "sha256": "529b754ae293aba4c4c713fc9774b198521f10898ee196ccce21552cedf8d789",
+      "size_bytes": 1541
+    },
+    {
+      "path": "contracts/schema.sql",
+      "sha256": "e3f248bea64778f0b0cc8604f264251f343bc15b53e4036cc6f8b23d2bea3055",
+      "size_bytes": 7528
+    },
+    {
+      "path": "contracts/schemas/analysis.schema.json",
+      "sha256": "20bccc212f9ec5ade1990a1531d0035f543451da0c9a41db3dcec41ab33c7fcb",
+      "size_bytes": 1259
+    },
+    {
+      "path": "contracts/schemas/execution.schema.json",
+      "sha256": "d19fde725f086094493cd431738b7b8ec40540b819835fead621709175275bb7",
+      "size_bytes": 2457
+    },
+    {
+      "path": "contracts/schemas/ground-truth.schema.json",
+      "sha256": "4e6ff252322901948f8792bc2b92b482edc5cc6d1f0505e40dfce133f9a06061",
+      "size_bytes": 2280
+    },
+    {
+      "path": "contracts/schemas/manifests.schema.json",
+      "sha256": "fa8b88b77caa85ccdd01a3718ca8db9a0a8a5e3c01f88c1f38f4075b6fc45f18",
+      "size_bytes": 2484
+    },
+    {
+      "path": "contracts/schemas/runtime.schema.json",
+      "sha256": "074fc6092a680d7e66b00dfbbd444ac2d8a4e8139cd73a28029bc32c827afb8c",
+      "size_bytes": 1889
+    },
+    {
+      "path": "inputs/CORPUS-AND-ENVIRONMENT.md",
+      "sha256": "647b3b3e64d8d89a9da62da13b6d7e104059a4b4fcacd843767d7e1523cf25fd",
+      "size_bytes": 3154
+    },
+    {
+      "path": "inputs/corpus-files.txt",
+      "sha256": "737157fec8123336bfcf4db6ed945ec49e626b6de703bc163b710553e8cb0001",
+      "size_bytes": 2454
+    },
+    {
+      "path": "inputs/corpus-manifest.json",
+      "sha256": "6e091212f544b4b914e107080c7992ac5b528198babe28e8b92e86efc9a17af5",
+      "size_bytes": 9146
+    },
+    {
+      "path": "inputs/environment-observation.json",
+      "sha256": "8f8766b934a03f07a3c06e3423d230b8423deecf041f18bbc32f0b230a275f1f",
+      "size_bytes": 720
+    },
+    {
+      "path": "inputs/ground-truth.json",
+      "sha256": "34d1cc9ea3b40232f9843444e6c1acc3de7968e93b086360235e55e6f40e568a",
+      "size_bytes": 189675
+    },
+    {
+      "path": "inputs/jpetstore-corpus-v1.0.0.zip",
+      "sha256": "42d50df2c9ae46e7fef11ccd6a58b2e2e040cbe2befeef62d8f33ad18ce49b50",
+      "size_bytes": 54705
+    },
+    {
+      "path": "inputs/mutation-M1.patch",
+      "sha256": "7888030551294bb636f0756d2f09b27308da5427a1e9d82f6ca1fcdac975a51b",
+      "size_bytes": 2264
+    },
+    {
+      "path": "inputs/mutation-M2.patch",
+      "sha256": "431bf30c28f0bf2c3783c6140b6b2f23dd038596238169f164a219143e9742a1",
+      "size_bytes": 788
+    },
+    {
+      "path": "inputs/mutation-M3.patch",
+      "sha256": "b85e237fcb43b45503e53b22eb065c9de80ab101c1f0cdda04f2e9c3cb221102",
+      "size_bytes": 520
+    },
+    {
+      "path": "validate_specs.py",
+      "sha256": "eede7daa0914236e4b34fb1ec844fac444efa62408aa83a2a27ec3493be0acfe",
+      "size_bytes": 6514
+    }
+  ],
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "execution_bundles": [
+    {
+      "path": "bundles/POC-0-execution-bundle-v1.0.0.zip",
+      "sha256": "e1698c356f160a91937c520c3c2baed6dd457758b4d89b234e4e590a7c0bf1a4",
+      "size_bytes": 81824,
+      "spec_id": "POC-0"
+    },
+    {
+      "path": "bundles/POC-1-execution-bundle-v1.0.0.zip",
+      "sha256": "00b65e760cfb2be56f53b989d82242f60e12e5af5e17b62dde3a1069f9a895c0",
+      "size_bytes": 81554,
+      "spec_id": "POC-1"
+    },
+    {
+      "path": "bundles/POC-2-execution-bundle-v1.0.0.zip",
+      "sha256": "8884e27bae29fe2378a9fa216b9a90aa3f0c45982caa9b884a01b50cdbd5a057",
+      "size_bytes": 81573,
+      "spec_id": "POC-2"
+    },
+    {
+      "path": "bundles/POC-3-execution-bundle-v1.0.0.zip",
+      "sha256": "24330db405c65794e09dfe524c46f81e9f7efef66274e7ce2dbc81347e5b2a09",
+      "size_bytes": 81599,
+      "spec_id": "POC-3"
+    },
+    {
+      "path": "bundles/POC-4-execution-bundle-v1.0.0.zip",
+      "sha256": "47f841ac0c86a62bb39aed5fbeb7ccfe2c8358de2b1e7ea0e6f6d3c6291a4ce4",
+      "size_bytes": 81538,
+      "spec_id": "POC-4"
+    },
+    {
+      "path": "bundles/POC-5-execution-bundle-v1.0.0.zip",
+      "sha256": "2c2154090630cafd496c46e15667c2e2a722e49d78407203a9ac2ea1b8228adf",
+      "size_bytes": 81481,
+      "spec_id": "POC-5"
+    },
+    {
+      "path": "bundles/CONTINUUM-execution-bundle-v1.0.0.zip",
+      "sha256": "2b8757b38790aca8c699b1e57c411964bdec408460b484dc620f72776d195812",
+      "size_bytes": 82068,
+      "spec_id": "CONTINUUM"
+    }
+  ],
+  "execution_gate": "BLOCKED_ENVIRONMENT_NOT_READY",
+  "kind": "specification-lock",
+  "lock_basis": {
+    "bundle_smoke": "PASS_EXPECTED_ENVIRONMENT_BLOCK",
+    "mutation_patch_check": "PASS",
+    "validation_command": "python specs/validate_specs.py",
+    "validation_status": "VALID"
+  },
+  "spec_set_version": "1.0.0",
+  "status": "LOCKED",
+  "supersedes": null
+}

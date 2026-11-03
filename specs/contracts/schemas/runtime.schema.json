@@ -1,0 +1,13 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://handoff.local/schemas/runtime.schema.json",
+  "$defs":{
+    "sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "uuid":{"type":"string","format":"uuid"},
+    "state":{"enum":["CREATED","INDEXING","ANALYZING","CHECKPOINTING","PAUSED","INTERRUPTED","RESUMING","REQUIRES_REVIEW","COMPLETED","FAILED","CANCELLED"]}
+  },
+  "oneOf":[
+    {"title":"SourceSnapshot","type":"object","additionalProperties":false,"required":["project_name","git_commit","ignore_rules","files"],"properties":{"project_name":{"type":"string"},"git_commit":{"type":["string","null"],"pattern":"^[0-9a-f]{40}$"},"ignore_rules":{"type":"array","items":{"type":"string"}},"files":{"type":"array","minItems":1,"items":{"type":"object","additionalProperties":false,"required":["path","size_bytes","sha256"],"properties":{"path":{"type":"string"},"size_bytes":{"type":"integer","minimum":0},"sha256":{"$ref":"#/$defs/sha256"}}}}}},
+    {"title":"Checkpoint","type":"object","additionalProperties":false,"required":["task_id","state","phase","verified_facts","pending_steps","evidence_refs","cursor_operation_id","snapshot_id","parser_version","prompt_version","model_tag","analysis_schema_version","checkpoint_schema_version"],"properties":{"task_id":{"$ref":"#/$defs/uuid"},"state":{"$ref":"#/$defs/state"},"phase":{"type":"string"},"verified_facts":{"type":"array","items":{"type":"object"}},"pending_steps":{"type":"array","items":{"type":"string"}},"evidence_refs":{"type":"array","items":{"$ref":"#/$defs/uuid"}},"cursor_operation_id":{"oneOf":[{"$ref":"#/$defs/uuid"},{"type":"null"}]},"snapshot_id":{"$ref":"#/$defs/sha256"},"parser_version":{"type":"string"},"prompt_version":{"type":"string"},"model_tag":{"type":["string","null"]},"analysis_schema_version":{"type":"string"},"checkpoint_schema_version":{"const":"1.0.0"}}}
+  ]
+}

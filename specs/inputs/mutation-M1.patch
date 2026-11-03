@@ -1,0 +1,42 @@
+--- a/src/main/java/org/mybatis/jpetstore/service/CatalogService.java
++++ b/src/main/java/org/mybatis/jpetstore/service/CatalogService.java
+@@ -96,7 +96,7 @@
+    *
+    * @return the list
+    */
+-  public List<Product> getProductListByCategory(String categoryId) {
++  public List<Product> listProductsByCategory(String categoryId) {
+     return productMapper.getProductListByCategory(categoryId);
+   }
+ 
+--- a/src/main/java/org/mybatis/jpetstore/web/controllers/CatalogController.java
++++ b/src/main/java/org/mybatis/jpetstore/web/controllers/CatalogController.java
+@@ -65,7 +65,7 @@
+   @GetMapping("/viewCategory")
+   public String viewCategory(@RequestParam(value = "categoryId", required = false) String categoryId, Model model) {
+     if (categoryId != null) {
+-      List<Product> productList = catalogService.getProductListByCategory(categoryId);
++      List<Product> productList = catalogService.listProductsByCategory(categoryId);
+       Category category = catalogService.getCategory(categoryId);
+       model.addAttribute("productList", productList);
+       model.addAttribute("category", category);
+--- a/src/main/java/org/mybatis/jpetstore/web/controllers/AccountController.java
++++ b/src/main/java/org/mybatis/jpetstore/web/controllers/AccountController.java
+@@ -94,7 +94,7 @@
+       return SIGNON_VIEW;
+     }
+     account.setPassword(null);
+-    List<Product> myList = catalogService.getProductListByCategory(account.getFavouriteCategoryId());
++    List<Product> myList = catalogService.listProductsByCategory(account.getFavouriteCategoryId());
+     session.setAttribute("accountBean", new AccountSession(account, myList, true));
+     return "redirect:/catalog";
+   }
+@@ -178,7 +178,7 @@
+   public String editAccount(@ModelAttribute Account account, HttpSession session) {
+     accountService.updateAccount(account);
+     Account updatedAccount = accountService.getAccount(account.getUsername());
+-    List<Product> myList = catalogService.getProductListByCategory(updatedAccount.getFavouriteCategoryId());
++    List<Product> myList = catalogService.listProductsByCategory(updatedAccount.getFavouriteCategoryId());
+     session.setAttribute("accountBean", new AccountSession(updatedAccount, myList, true));
+     return "redirect:/account/edit";
+   }

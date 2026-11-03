@@ -1,0 +1,11 @@
+--- a/src/main/java/org/mybatis/jpetstore/web/controllers/AccountController.java
++++ b/src/main/java/org/mybatis/jpetstore/web/controllers/AccountController.java
+@@ -42,7 +42,7 @@
+ public class AccountController {
+ 
+   /** The signon view. */
+-  private static final String SIGNON_VIEW = "account/SignonForm";
++  private static final String SIGNON_VIEW = "account/SignonFormV2";
+   /** The new account view. */
+   private static final String NEW_ACCOUNT_VIEW = "account/NewAccountForm";
+   /** The edit account view. */

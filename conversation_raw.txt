@@ -1,0 +1,1292 @@
+Skip to content
+Chat history
+New chat
+Images
+Plugins
+Deep research
+Maps
+NEW
+See plans and pricing
+Settings
+Help
+
+Get responses tailored to you
+
+Log in to get answers based on saved chats, plus create images and upload files.
+
+Log in
+ChatGPT
+Share
+Log in
+Sign up for free
+
+This is a copy of a shared ChatGPT chat. It won't be added to memory.
+
+Report conversation
+
+有，而且目前網路上已經有不少產品與開源專案，分別涵蓋你規劃的兩層架構。
+
+不過，我先講一個重要結論：
+
+目前有很多產品能做到「AI 理解程式碼」，也有不少框架能做到「長任務 Checkpoint 與恢復」，但這兩種能力通常分屬不同產品。
+
+你的構想不是完全沒有競爭者，而是把兩個領域整合成一個可以持續執行、能中斷恢復、能產出可驗證技術成果的平台。
+
+我將它們分成四類來比較。
+
+一、第一類：長任務 Runtime 與 Checkpoint
+
+這一類最接近你規劃的底層 Layer 1。
+
+專案	開源／商業	主要功能	與你的 MVP 的關係
+LangGraph	開源＋商業服務	Agent 工作流程、狀態保存、Checkpoint、恢復	非常接近
+Temporal	開源＋商業雲端	長時間工作流程、失敗恢復、重試	Runtime 的重要參考
+AgentLedger	開源	Agent 執行紀錄、恢復、重播、證據	與可靠性設計高度相關
+CONTINUUM	開源	語意 Checkpoint、狀態驗證、恢復	與你的核心構想非常接近
+1. LangGraph
+9
+
+官方網站：LangGraph
+
+這是我認為你最應該優先研究的專案之一。
+
+它具有：
+
+Graph 工作流程控制。
+
+每個節點執行後保存狀態。
+
+Checkpoint。
+
+中斷後恢復。
+
+Human-in-the-loop。
+
+多步驟 Agent 執行。
+
+它的 Checkpoint 可以保存 Graph State，透過相同的 thread_id 接續執行。官方也提供 SQLite、PostgreSQL 等 Checkpointer。
+GitHub
++1
+
+與你的差異：
+
+LangGraph 提供的是 Agent 工作流程與狀態管理基礎，你還需要自己實作：
+
+Java 專案分析流程。
+
+程式碼索引。
+
+分析證據管理。
+
+技術交接報告。
+
+專案知識累積。
+
+我的建議：第一版不一定要自己從零實作 State Machine，可以先研究 LangGraph 的 Checkpoint 機制，評估是否直接採用。
+
+2. Temporal
+7
+
+官方網站：Temporal
+
+這個專案值得研究的原因是，它本來就專注於長時間、可靠的工作流程。
+
+例如：
+
+開始任務
+   ↓
+執行分析
+   ↓
+保存狀態
+   ↓
+系統突然關閉
+   ↓
+重新啟動
+   ↓
+恢復工作流程
+   ↓
+繼續執行
+   ↓
+完成任務
+
+Temporal 的核心是 Durable Execution，官方說明支援在程式崩潰、網路故障或基礎設施中斷後恢復工作流程。
+Temporal 文檔
+
+但要注意：
+
+Temporal 是通用工作流程平台，不是專門為小模型 Context Window 設計的 Agent 接力系統。
+
+如果你未來希望支援：
+
+多個 Agent 同時工作。
+
+長時間程式分析。
+
+多任務排程。
+
+服務中斷後恢復。
+
+跨機器執行。
+
+Temporal 就會是很值得研究的底層技術。
+
+3. AgentLedger
+
+GitHub：AgentLedger
+
+這個專案與你的構想相當接近。
+
+它的定位是 Agent Runtime Reliability Layer，重點包括：
+
+長任務 Checkpoint。
+
+Crash Recovery。
+
+Tool Ledger。
+
+執行紀錄。
+
+Replay。
+
+Evidence。
+
+SQLite、PostgreSQL 等儲存後端。
+
+它不是要取代 LangGraph，而是希望補足 Agent 執行過程的可靠性。
+GitHub
+
+我認為值得列入技術評估清單。
+
+4. CONTINUUM
+
+GitHub：CONTINUUM
+
+這個專案尤其值得注意。
+
+它提出一個與我們之前討論非常接近的觀念：
+
+不要保存整段對話作為任務記憶，而是保存能夠讓 Agent 繼續工作的語意 Checkpoint。
+
+它的設計包含：
+
+Semantic Checkpoints。
+
+Idempotent Action Ledger。
+
+Hash-chained Event Log。
+
+環境重新驗證。
+
+SQLite / PostgreSQL 持久化。
+
+這與你希望解決的「Context Window 滿了，換一個 Session 繼續工作」高度相關。
+GitHub
+
+不過，這類新興專案應先檢查程式碼品質、測試覆蓋率、授權及實際 Crash Recovery 測試，不宜只看 README 就直接當成生產級元件。
+
+二、第二類：AI 程式碼理解與逆向工程
+
+這一類最接近你的上層 Layer 2。
+
+這裡有幾個成熟度較高的產品。
+
+1. SciTools Understand
+8
+
+官方網站：SciTools Understand
+
+這是我認為你必須深入研究的競品。
+
+它不是一般的 AI Coding Assistant，而是專業的程式碼靜態分析與理解工具。
+
+主要功能：
+
+功能	說明
+Code Navigation	Class、Function、Variable 導覽
+Call Graph	方法呼叫關係
+Cross Reference	程式碼交互引用
+Dependency Graph	模組依賴關係
+Architecture	軟體架構分析
+Metrics	複雜度與品質指標
+Offline AI	本地 AI 輔助程式理解
+API / CLI	自動化分析
+
+特別值得注意的是，它已經提供離線 AI 助理，可以使用解析後的程式模型回答問題，而不是只把原始程式碼塞進 LLM Context。官方也說明支援離線及 Air-gapped 環境。
+SciTools
++1
+
+官方公開的起始價格為每月 US$100，採年約制；實際企業授權仍需詢價。
+SciTools
+
+對你的啟發：
+
+它已經證明一件事：
+
+使用者真正需要的不是 AI 幫忙讀程式碼，而是先建立一個可靠的程式結構模型，再讓 AI 根據這個模型回答問題。
+
+這與我們規劃的 Parser + LLM 架構一致。
+
+2. CAST Imaging
+12
+
+官方網站：CAST Imaging
+
+這是企業級應用系統逆向工程與架構分析平台。
+
+主要功能：
+
+自動分析應用程式結構。
+
+建立程式元件知識庫。
+
+分析程式依賴。
+
+視覺化應用程式架構。
+
+變更影響分析。
+
+找出應用程式技術風險。
+
+官方文件指出支援超過 150 種技術，包括 Java/JEE、.NET、SQL、Web 及 Mainframe。
+Documentation
+
+它與你的產品非常接近的地方：
+
+都是希望讓使用者不必逐一閱讀龐大的舊系統程式碼，就能理解整個系統的組成與依賴。
+
+主要差別在於你的構想還希望加入長時間自主執行、跨 Session 恢復，以及地端小模型的任務接力。
+
+3. CodeScene
+8
+
+官方網站：CodeScene
+
+它比較偏向軟體品質、技術債與開發風險分析。
+
+主要功能：
+
+Code Health。
+
+技術債分析。
+
+程式複雜度。
+
+變更熱點。
+
+維護風險。
+
+團隊開發活動分析。
+
+它的特色是結合程式碼結構與版本控制歷史，找出容易出問題的區域。
+CodeScene
+
+這類工具可以成為你未來的擴充方向，但不是第一版 MVP 的直接替代品。
+
+4. Sourcegraph
+7
+
+官方網站：Sourcegraph
+
+主要能力：
+
+跨 Repository 搜尋。
+
+Code Navigation。
+
+Cross Reference。
+
+AI Code Search。
+
+自然語言詢問程式碼。
+
+程式變更影響分析。
+
+其中 Deep Search 可以透過 AI 搜尋程式碼並提供有來源依據的答案。
+Sourcegraph
+
+它比較偏向大型企業的程式碼搜尋與理解，不是完整的長任務 Runtime。
+
+三、第三類：開源程式碼理解工具
+
+如果你希望降低 MVP 開發成本，這一類非常重要。
+
+專案	主要功能	適合你的用途
+CodeGraph	程式碼結構圖、Symbol、Dependency	建立程式知識索引
+Jar Analyzer	JAR 分析、Call Chain、Taint Analysis	Java 舊系統逆向工程
+JStudio	Java Bytecode、AST、Call Graph	深入分析 Java 程式
+Understand Anything	多 Agent 分析、知識圖譜、架構視覺化	AI 程式碼理解
+JavaParser	Java AST、Symbol Resolution	自行開發 Parser
+值得特別研究的兩個專案
+
+A. CodeGraph
+
+CodeGraph 專案文件
+
+它採用 Tree-sitter 解析程式碼，將 Symbol、關係及檔案資訊存入 SQLite，並提供 MCP、CLI 等介面。
+
+這個設計與我們之前規劃的：
+
+程式碼
+  ↓
+Parser
+  ↓
+Symbol Index
+  ↓
+Dependency Graph
+  ↓
+MCP
+  ↓
+AI Agent
+
+非常接近。
+Colby McHenry
+
+B. Jar Analyzer
+
+Jar Analyzer GitHub
+
+這個專案針對 Java Bytecode 分析，功能包括：
+
+Method Call Chain。
+
+DFS 呼叫鏈分析。
+
+Taint Analysis。
+
+Java Web 元件入口分析。
+
+Control Flow Graph。
+
+AI Assistant。
+
+如果未來需要分析沒有完整原始碼的舊 Java 系統，這個方向值得研究。
+Hysen Labs
+
+四、第四類：競品功能比較
+
+這張表是我認為最值得你參考的部分。
+
+產品／專案	長任務恢復	程式結構分析	AI 語意理解	地端部署	技術交接報告
+LangGraph	★★★★★	—	★★★★★	可	需自行開發
+Temporal	★★★★★	—	需整合	可自架	需自行開發
+AgentLedger	★★★★★*	—	需整合	可	證據／執行紀錄
+CONTINUUM	★★★★★*	—	需整合	可	需自行開發
+Understand	—	★★★★★	★★★★	★★★★★	有報表能力
+CAST Imaging	—	★★★★★	依產品方案	需確認部署方案	有分析成果
+CodeScene	—	★★★★	輔助分析	依方案	有品質報告
+Sourcegraph	—	★★★★★	★★★★★	依產品方案	需整合
+CodeGraph	—	★★★★	交由外部 Agent	★★★★★	需自行開發
+Jar Analyzer	—	★★★★★	有 AI Assistant	★★★★★	部分支援
+
+註：
+
+星級是依照公開功能與你的 MVP 需求所做的相對評估，不是產品官方評分。
+
+— 表示不是該產品的核心功能。
+
+* 表示專案定位與功能設計高度相關，但不代表已經達到成熟商業平台的可靠性保證。
+
+「地端部署」是指具備本地或自架可能性，不代表所有功能、模型與企業授權都完全離線。
+
+五、這些競品對你的 MVP 有什麼影響？
+
+我認為應該區分三種情況。
+
+情況 A：直接使用現有工具，不自己開發
+
+例如：
+
+LangGraph
+   +
+Understand
+   +
+Ollama
+
+優點：
+
+開發時間短。
+
+可以快速驗證產品價值。
+
+不必重新開發成熟的程式分析功能。
+
+缺點：
+
+系統整合成本。
+
+產品能力受限於現有工具。
+
+不容易掌握完整任務生命週期。
+
+情況 B：自己開發 Runtime，整合現有 Parser
+
+例如：
+
+             自行開發
+       Long-running Runtime
+                │
+                ▼
+          Task Orchestrator
+                │
+        ┌───────┴────────┐
+        ▼                ▼
+    Checkpoint       Recovery
+        │                │
+        └───────┬────────┘
+                │
+                ▼
+           Code Analyzer
+                │
+       ┌────────┼────────┐
+       ▼        ▼        ▼
+   JavaParser CodeGraph SQLGlot
+       │        │        │
+       └────────┼────────┘
+                ▼
+              Ollama
+                │
+                ▼
+          技術交接報告
+
+這是我最推薦的 MVP 方向。
+
+原因是：
+
+Runtime 是你想驗證的核心。
+
+Parser 不需要全部自己開發。
+
+LLM 可以專注在業務邏輯理解。
+
+未來可以更換模型與分析工具。
+
+情況 C：全部自行開發
+
+包含：
+
+Runtime。
+
+Checkpoint。
+
+Parser。
+
+Symbol Index。
+
+Dependency Graph。
+
+LLM Adapter。
+
+Agent。
+
+Report Generator。
+
+這種方式自由度最高，但第一版開發成本也最高。
+
+我不建議現在採用。
+
+六、我對這個產品的競爭定位建議
+
+這裡有一個很重要的判斷。
+
+如果你的產品只是：
+
+把程式碼切片，送給 Ollama 分析，最後產生 Markdown。
+
+那麼市場上已經有許多工具可以做到類似的事情，差異化不夠。
+
+但如果你的產品定位是：
+
+使用者交付一個複雜任務，AI 自動規劃、長時間執行、保存工作狀態、跨 Session 接續，並且累積可以追溯與驗證的專案知識。
+
+這就不只是程式碼分析工具了。
+
+我建議把競爭優勢放在五個地方：
+
+差異化能力	現有市場的常見情況	你的產品目標
+長任務管理	Agent 通常由特定工作流程或 Session 控制	任務可以持續數小時或更久
+跨 Session 接力	部分工具有狀態保存，但不一定涵蓋完整任務	自動交接與恢復
+跨模型接力	常與特定模型或 Agent Host 綁定	模型可替換
+專案知識累積	程式索引與聊天記憶通常分開	結構化知識持續累積
+可驗證成果	AI 回答可能缺乏完整證據	每個重要結論都有程式碼依據
+七、我建議你優先深入研究的五個專案
+
+如果是為了決定第一版 MVP 的技術架構，我會按照以下順序：
+
+優先順序	專案	研究目的
+1	LangGraph	研究 Checkpoint、Resume、狀態管理
+2	AgentLedger	研究 Agent 執行可靠性與 Evidence
+3	CONTINUUM	研究語意 Checkpoint 與跨 Session 接續
+4	Understand	研究成熟的程式碼結構分析與離線 AI
+5	CodeGraph	研究本地程式知識圖譜與 MCP
+
+另外，我特別建議你先實際比較 LangGraph、AgentLedger 和 CONTINUUM 的恢復機制。
+
+因為你的第一個核心假設是：
+
+「小模型的 Context Window 用完，或者程式被強制中斷後，能不能真正接續原本的任務？」
+
+這三個專案提供了很好的研究起點。
+
+而 Understand 則是另一個重要的競品基準：它能幫你確認，自己開發的程式分析層究竟還缺少哪些成熟能力。
+
+下一步最有價值的工作，是製作一份「五個核心競品的深度拆解報告」：逐一比較架構、原始碼、Checkpoint 機制、模型接入方式、授權、部署方式，以及哪些功能值得直接採用、哪些才是真正值得自己開發的差異化能力。
+
+Sources
+
+Branched from 方案可行性評估
+
+Today 6:58 PM
+這是一份針對 LangGraph、AgentLedger、CONTINUUM、Understand、CodeGraph 五個核心競品的深度拆解與地端落地評估報告。
+競品技術定位總覽
+                                  【AI 理解與程式模型層】
+                                            ▲
+                                            │
+                     ┌──────────────────────┴──────────────────────┐
+                     │                                             │
+             [ SciTools Understand ]                          [ CodeGraph ]
+         (商業/專業靜態分析+語意索引)                   (開源 Tree-sitter + MCP 模式)
+                                            │
+                                            │ (結合)
+                                            ▼
+                                  【長任務 Runtime 核心】
+                                            │
+     ┌──────────────────────────────────────┼──────────────────────────────────────┐
+     ▼                                      ▼                                      ▼
+[ LangGraph ]                        [ AgentLedger ]                         [ CONTINUUM ]
+( Graph/Node 狀態圖 )           ( 可追溯 Causal Ledger/工具日誌 )          ( 語意 Checkpoint + 狀態驗證 )
+
+五大核心競品深度拆解
+1. LangGraph（Graph 狀態驅動的 Workflow 引擎）
+ * 定位：Agent 流程控制與 Session 級別狀態持久化框架。
+ * 架構與機制：
+   * State Graph：以有向圖描述 Agent 行為，每一個 Node 執行結束後透過 Checkpointer 將當前 State（字典/消息串列）寫入 SQLite/Postgres。
+   * Resume 機制：透過 thread_id 恢復最新 Checkpoint。若執行中斷，從上一個節點重新觸發。
+ * 痛點與侷限：
+   * Context 膨脹：預設保存全量 Prompt 與對話 Context（messages key），未解決長任務小模型 Context Window 爆表問題。
+   * 無環境驗證：若在執行中斷期間原始碼檔案已被手動變更，LangGraph 盲目讀取舊 State 續傳會導致邏輯混亂。
+2. AgentLedger（Agent 行為可追溯與幂等控制層）
+ * 定位：Agent 執行側寫（Trace）與外部 Action/Tool 追溯 Ledger。
+ * 架構與機制：
+   * Causal Action Ledger：記住 Agent 發出的每一個 Tool Call / Side-effect。
+   * Replay & Audit：提供 Hash 檢驗與 Trace Replay，若系統 Crash，可追溯「哪一個 Tool Call 已經執行完畢、哪一個留在半空中」。
+ * 痛點與侷限：偏向安全審計與支出控制（Financial/Action Vault），欠缺完整的程式分析模型與知識圖譜構建能力。
+3. CONTINUUM（可驗證的語意 Checkpoint 恢復引擎）
+ * 定位：專為長時間運行的 AI Agent 設計的 Semantic Recovery Layer。
+ * 架構與機制：
+   * Semantic Checkpoint：拒絕 Dump 對話文字，僅提取「當前任務目標、已驗證的事實（Provenances）、未完成步驟（PlanStep）」。
+   * Environment Revalidation：恢復執行前，自動比對檔案 Hash 與環境變數，若檔案在 Crash 期間被改動，標註 REQUIRES_REVIEW 並觸發區域 Repair 流程。
+   * Hash-chained Event Log：使用類似區塊鏈的 Event Log（Append-only）保證紀錄不被竄改，確保可追溯性。
+ * 痛點與侷限：為較新的架構專案，底層重構頻率高，適合借鏡其架構設計思想而非直接引入整套 SDK。
+4. SciTools Understand（企業級靜態分析與離線 AI 標杆）
+ * 定位：專業程式碼解析、依賴圖表繪製與離線 AI 搜尋工具。
+ * 架構與機制：
+   * Parser 優先：先將程式碼編譯成標準 AST 與 C/C++/Java/C# Symbol Table，點對點查詢 Call Graph。
+   * Air-gapped AI Support：支援地端 LLM 介面，AI 詢問直接基於 Parser 解析出來的結構化模型回答，精準度極高。
+ * 對 MVP 啟示：證明了「先建結構模型，再用 AI 解析」是唯一能解決幾十萬行 Java 舊系統分析的正確路徑。
+5. CodeGraph（輕量化 Tree-sitter + MCP 程式知識庫）
+ * 定位：利用開源 Parser 建立本地程式庫 Symbol Index 的 MCP 服務。
+ * 架構與機制：
+   * 利用 Tree-sitter 多語言解析器提取 Symbol 與 Dependency，寫入 SQLite。
+   * 提供 MCP (Model Context Protocol) 介面，讓 LLM 透過工具查詢類別關係，不把整支程式碼載入 Context。
+核心 Checkpoint & Crash Recovery 機制縱向對比
+| 對比維度 | LangGraph | AgentLedger | CONTINUUM |
+|---|---|---|---|
+| 持久化內容 | 全量 Graph State / 歷史 Message | Tool Call 側寫與 Action Log | 語意 Checkpoint（精簡事實+未完成步驟） |
+| Crash 恢復邏輯 | 從最後一個 Node 重新帶入舊 Context | 重新比對 Tool ID，防止重複觸發 Side-effect | 重新驗證環境 (Revalidation)，修復過期事實後接續 |
+| Context 膨脹控制 | 較弱（需手動寫 Reducer 裁剪對話） | 無（不處理 Prompt/Context） | 極強（丟棄歷史對話，僅保留精簡 State） |
+| 外部變更防禦 | 無（無法感知環境檔案被修改） | 無 | 有 (Hash-chained Evidence & File Digest) |
+| 適合層級 | Workflow 狀態轉移 | API / Tool 安全防禦 | 小模型 Context 接力與長任務恢復 |
+地端落地方案與架構選擇（ISO 27001 / Air-Gapped 評估）
+針對完全離線（Air-gapped）、ISO 27001 稽古稽核與地端 Ollama/vLLM 小模型運算要求：
+1. 狀態與 Checkpoint 層設計（吸取 CONTINUUM + LangGraph 專長）
+ * 捨棄「全量 Message 持久化」：地端 Qwen 3.5 8B/14B 模型 Context Window 限制明顯（8k-16k 性能最佳）。採用 CONTINUUM 的 Semantic Checkpoint 模式：
+   Checkpoint State = {
+   "task_id": "BUGNET_MIG_001",
+   "current_phase": "CONTROLLER_MAPPING",
+   "verified_facts": [ {"symbol": "UserController.cs", "java_target": "UserController.java", "status": "VERIFIED"} ],
+   "pending_steps": [ "Map AuthFilter to Spring Security FilterChain" ],
+   "environment_hashes": { "UserController.cs": "a1b2c3d4..." }
+}
+
+ * 使用 SQLite 保存 Hash-chained Event Log：所有 LLM 的推理結果與工具呼叫均附加 SHA256 簽名與時間戳記寫入地端 SQLite，滿足 ISO 27001 稽核軌跡要求。
+2. 程式碼解析與知識模型層（整合 CodeGraph 理念）
+ * 本地化 Tree-sitter Parser + SQLite：地端部署 Python/FastAPI 服務，利用 Tree-sitter 與 JavaParser 自動掃描舊系統（如 BugNET 或 Java Web），產出 SQLite 格式的 Symbol Table 與 Call Graph。
+ * MCP / Tool 整合：AI Agent 每次執行時，不盲目讀取全量程式碼，而是透過 Tool 查詢 SQL：「SELECT callers FROM call_graph WHERE target = 'ProcessOrder'」，僅注入必要的上下文。
+實作構想與下一步
+我們自己開發的最簡 Runtime 只需要具備三個核心模組：
+ * CodeIndexer：基於 Tree-sitter / JavaParser 的本地 SQLite 結構化索引器。
+ * SemanticCheckpointManager：仿造 CONTINUUM 邏輯，當 Context 達到 70% 閾值時，強制 LLM 輸出「結構化階段性小結」，清空舊 Context 並重啟 Session。
+ * EvidenceLogger：記錄每一段 AI 推理所採用的原始碼檔案、行號與 Hash 驗證碼。
+相關影片推薦
+LangGraph Persistence and Checkpointing Deep Dive
+這支影片深入解析了包含 CONTINUUM 與 LangGraph 在內的語意 Checkpoint 與持久化恢復機制，非常適合用於進一步評估長任務狀態管理的實作細節。
+
+Show more
+
+這份報告已經相當接近可以進入 MVP 技術選型的階段。不過，我仔細檢視後，有幾個地方我認為需要修正，尤其是 CONTINUUM 的成熟度、AgentLedger 的專案可信度，以及 LangGraph 的 Checkpoint 機制。
+
+我的整體判斷是：
+
+這五個專案不應該全部拿來當成競品，有些應該直接採用，有些應該借鏡，有些則應該先做技術驗證。
+
+我從產品定位、技術可行性及 MVP 開發成本三個角度評估。
+
+一、五個專案的重新評估
+專案	我的評價	建議處理方式
+LangGraph	成熟的 Workflow / Agent 框架	研究機制，評估是否採用
+AgentLedger	需要先確認專案來源及實際程式碼	暫不列為核心依賴
+CONTINUUM	與長任務恢復目標高度吻合	優先實際測試
+SciTools Understand	成熟的商業程式分析工具	作為競品及分析能力標竿
+CodeGraph	符合地端程式知識索引需求	優先整合測試
+1. LangGraph：不需要自己重新發明 Workflow Engine
+
+它最有價值的地方是：
+
+State Graph
+
+Node 執行管理
+
+Checkpoint
+
+Thread Persistence
+
+Interrupt / Resume
+
+但報告中有一點需要修正：
+
+LangGraph 並不是預設一定保存全量 Prompt 與所有歷史訊息。
+
+它保存什麼，取決於開發者定義的 State Schema。
+
+如果 State 裡面放了完整 messages，才會有 Context 膨脹問題。
+
+因此，我建議不要直接否定 LangGraph，而是研究它的狀態持久化機制，再決定是否採用。
+
+官方文件：LangGraph Persistence
+
+2. AgentLedger：暫時不要列為正式技術依賴
+
+這裡我要特別提醒。
+
+目前我沒有找到足以確認先前所描述的 AgentLedger 專案及其完整功能的可靠官方證據。
+
+因此，之前報告所提到的：
+
+Causal Action Ledger
+
+Financial / Action Vault
+
+Replay
+
+Hash Verification
+
+不能直接當成已經確認的產品功能。
+
+建議先取得確切 GitHub Repository，再做原始碼審查。
+
+在此之前，可以把這些功能列為我們自己的技術需求，而不是依賴一個尚未確認的專案。
+
+3. CONTINUUM：目前最值得深入測試
+7
+
+CONTINUUM GitHub 原始碼
+
+這個專案確實存在，而且與我們的核心需求相當接近。
+
+它有幾個值得研究的機制：
+
+功能	對我們的價值
+Semantic Checkpoint	不需要保存整段對話
+SQLite Persistence	本地任務持久化
+Hash-chained Event Log	執行紀錄完整性驗證
+Environment Revalidation	恢復前檢查環境變化
+Idempotent Action Ledger	避免重複執行副作用
+Model Switch	不同模型接續任務
+MCP Server	與其他 Agent 整合
+
+但有兩個重要限制。
+
+第一：專案自我測試不等於獨立生產環境驗證。
+
+README 公開了大量測試及 Benchmark 結果，但仍需要我們自己執行 Crash Recovery 測試。
+
+第二：語意 Checkpoint 不等於完整工作成果。
+
+例如：
+
+已完成：
+OrderServlet 分析
+
+待處理：
+PaymentService 分析
+
+這還不夠。
+
+必須同時保存分析結果、程式碼版本、證據位置及未完成步驟。
+
+否則恢復後仍可能需要重新分析。
+
+我的建議：把 CONTINUUM 列為第一優先技術驗證對象。
+
+4. SciTools Understand：最重要的商業競品
+7
+
+SciTools Understand
+
+這個產品值得認真研究。
+
+它已經提供：
+
+程式結構解析
+
+Call Graph
+
+Cross Reference
+
+Dependency Analysis
+
+Code Metrics
+
+Python API
+
+CLI
+
+Local AI
+
+而且官方文件已明確提供完全離線安裝及執行方式，也支援本地模型與 Ollama。
+ai-docs.scitools.com
++2
+SciTools Documentation
++2
+
+這代表我們不能把「地端 AI 程式碼分析」當成唯一的差異化。
+
+真正需要區隔的是：
+
+Understand 偏向程式碼理解與靜態分析。
+
+我們則希望進一步做到：
+
+把分析工作變成可以持續數小時、跨 Session、跨模型、能中斷恢復的自主任務。
+
+5. CodeGraph：非常適合放進 MVP
+7
+
+這裡需要注意，CodeGraph 是多個不同專案使用的名稱，必須確認具體 Repository。
+
+例如目前找到的：
+
+CodeGraph - isink17
+
+它具備：
+
+Tree-sitter
+
+SQLite
+
+Symbol Index
+
+Call Graph
+
+Dependency Graph
+
+Incremental Indexing
+
+MCP
+
+Hybrid Search
+
+另一個版本：
+
+CodeGraph - colbymchenry
+
+也採用 Tree-sitter + SQLite + MCP 的設計。
+Colby McHenry
+
+這類工具非常符合我們的需求。
+
+因為小模型不需要自己讀取 100 個檔案來找出 Method 關係。
+
+它只需要呼叫：
+
+find_symbol()
+find_callers()
+find_callees()
+find_dependencies()
+get_source()
+get_impact()
+
+就可以取得必要的程式資訊。
+
+不過要注意：Tree-sitter 能解析語法，不代表一定能正確解析 Java 的完整型別及動態呼叫關係。這部分仍需要實際驗證。
+
+二、我建議調整原本的雙層架構
+
+原本的設計是：
+
+Layer 2：Code Intelligence
+Layer 1：Long-running Runtime
+
+我認為還需要一個獨立的 Evidence / Knowledge 儲存概念。
+
+不一定要變成第三層，但必須明確區分三種資料：
+
+程式碼事實。
+
+AI 分析結論。
+
+任務執行狀態。
+
+建議架構如下：
+
+┌─────────────────────────────────────────┐
+│           User Application              │
+│                                         │
+│     專案分析 / 交接文件 / 影響分析        │
+└──────────────────┬──────────────────────┘
+                   │
+┌──────────────────▼──────────────────────┐
+│       Layer 2：Code Intelligence         │
+│                                         │
+│  Code Scanner                           │
+│       │                                 │
+│  CodeGraph / JavaParser                 │
+│       │                                 │
+│  Symbol / Call Graph / SQL              │
+│       │                                 │
+│  Analysis Pipeline                      │
+│       │                                 │
+│  Ollama / Qwen                           │
+│       │                                 │
+│  Report Generator                       │
+└──────────────────┬──────────────────────┘
+                   │
+┌──────────────────▼──────────────────────┐
+│       Layer 1：Long Task Runtime         │
+│                                         │
+│  Task Orchestrator                      │
+│       │                                 │
+│  Semantic Checkpoint                    │
+│       │                                 │
+│  Recovery Manager                       │
+│       │                                 │
+│  Context Manager                        │
+│       │                                 │
+│  Model Adapter                          │
+└──────────────────┬──────────────────────┘
+                   │
+┌──────────────────▼──────────────────────┐
+│       Persistence & Evidence             │
+│                                         │
+│  SQLite                                 │
+│  ├── Task State                         │
+│  ├── Execution Event                    │
+│  ├── Checkpoint                         │
+│  ├── Evidence                            │
+│  └── Analysis Result                    │
+│                                         │
+│  File Storage                           │
+│  ├── JSON                               │
+│  ├── Markdown                           │
+│  └── Source Snapshot / Hash             │
+└─────────────────────────────────────────┘
+
+這樣未來上層不只有程式碼分析，還可以替換成其他應用。
+
+三、最值得做的事情：不要全部自行開發
+
+我建議採取以下技術組合：
+
+功能	建議方案	自行開發程度
+Java Parser	JavaParser	少量整合
+多語言 Parser	Tree-sitter	少量整合
+程式知識圖譜	CodeGraph	優先採用
+任務恢復	CONTINUUM	優先驗證
+Workflow	Python 自行控制或 LangGraph	MVP 簡化
+Context 管理	自行開發	核心能力
+LLM Adapter	Ollama API	自行封裝
+Evidence	SQLite	自行設計
+報告	Python + Markdown	自行開發
+
+其中有一個關鍵：
+
+不要同時使用 LangGraph 和 CONTINUUM 管理同一份任務狀態，否則容易形成兩套 Checkpoint 的一致性問題。
+
+MVP 可以先讓 CONTINUUM 負責持久化與恢復，Python 負責確定性工作流程。
+
+等驗證完成，再決定是否需要 LangGraph。
+
+四、最重要的技術實驗：我建議做一個比較測試
+
+不要只看五個專案的 README。
+
+我們直接建立一個實驗，測試：
+
+測試項目	A 組	B 組	C 組
+Runtime	自製 SQLite	LangGraph	CONTINUUM
+Checkpoint	JSON	Graph State	Semantic State
+模型	同一個 Qwen	同一個 Qwen	同一個 Qwen
+任務	分析 50 個 Java 檔案	相同	相同
+Context	相同限制	相同	相同
+
+執行以下故障注入：
+
+正常執行。
+
+Context 達到 70%。
+
+強制 Kill Python Process。
+
+關閉 Ollama。
+
+修改一個已分析的 Java 檔案。
+
+重新啟動。
+
+更換模型。
+
+繼續完成剩餘任務。
+
+記錄：
+
+指標	評估目的
+恢復成功率	是否能真正 Resume
+重複分析次數	是否浪費 Token
+遺失成果數量	是否有資料遺失
+恢復時間	是否能快速接續
+Token 消耗	小模型是否能負擔
+分析正確率	最終報告品質
+VRAM 峰值	地端硬體負擔
+
+這個實驗會比單純研究架構圖更有價值。
+
+五、還有一個重要問題：ISO 27001
+
+你的報告提到：
+
+使用 SQLite 保存 Hash-chained Event Log，可以滿足 ISO 27001 稽核要求。
+
+這句話我建議修正。
+
+Hash-chained Event Log 可以提供：
+
+紀錄完整性驗證。
+
+異動偵測。
+
+執行歷程追溯。
+
+證據來源追蹤。
+
+但它本身不能直接代表符合 ISO 27001。
+
+還必須考慮：
+
+存取權限控制。
+
+管理者權限分離。
+
+日誌保存期限。
+
+備份及還原。
+
+時間同步。
+
+日誌匯出及稽核。
+
+金鑰管理。
+
+防止資料庫管理者直接竄改紀錄。
+
+尤其 SQLite 是本地資料庫，Hash Chain 也不能單獨防止有權限的人同時修改資料及重新計算 Hash。
+
+因此，正式環境還需要將重要紀錄定期匯出到受保護的唯讀儲存區。
+
+六、我的最終建議：MVP 採用與自行開發的界線
+
+我會這樣定案：
+
+元件	決策	原因
+CONTINUUM	優先 PoC	驗證語意接力與恢復
+CodeGraph	優先 PoC	減少自行開發程式索引的成本
+JavaParser	採用	補強 Java 專屬解析
+Ollama	採用	地端模型服務
+SQLite	採用	本地持久化
+Context Manager	自行開發	這是產品核心差異
+Analysis Pipeline	自行開發	形成真正的使用者價值
+Evidence Manager	自行開發	確保分析成果可追溯
+Report Generator	自行開發	形成最終交付成果
+LangGraph	暫緩	避免增加第二套狀態管理
+七、我認為目前最值得驗證的三件事
+
+第一，CONTINUUM 能不能真正做到小模型跨 Session 接力，而不是只有一般工作流程恢復。
+
+第二，CodeGraph 能不能正確理解你的 Java 舊系統，特別是 Servlet、DAO、JSP、SQL、XML 之間的關係。
+
+第三，7B／14B 小模型在有結構化程式知識輔助的情況下，能否產生比直接把程式碼丟給 AI 更有價值的分析成果。
+
+這三個問題全部得到正面結果，就有充分理由繼續投資這個 MVP。
+
+我不建議現在就開始從零撰寫 Runtime。先用 CONTINUUM + CodeGraph + Ollama 組合做一次 50 個 Java 檔案的實際驗證，找出現有工具無法滿足的缺口，再決定哪些部分值得自行開發。
+
+這樣可以避免花幾個月重複開發市場上已經存在的功能。
+
+Sources
+這份修正與架構定案非常精準，完全切中企業級 AI 研發的核心痛點。特別是「避免同時使用 LangGraph 與 CONTINUUM 造成狀態衝突」以及「釐清 Hash-chaining 與 ISO 27001 合規性的本質區別」，這兩個觀點展現了資深架構師對系統複雜度與資安邊界的把關。
+針對你提出的最終定案與技術驗證路徑，以下我從工程落地的角度做幾點呼應與補充：
+一、 架構分層與自研界線的共識
+你重新梳理的三層架構（User Application / Layer 2: Code Intelligence / Layer 1: Long Task Runtime + Persistence & Evidence）非常清晰。這樣的切分帶來兩個決定性的工程優勢：
+ * 解耦「代碼理解」與「狀態恢復」：
+   讓 CodeGraph / JavaParser 專心處理靜態分析與符號對應，讓 CONTINUUM（或自研 Runtime）專心處理 Checkpoint 與工作流。兩者透過統一的 SQLite Evidence Store 交換資料，互不干擾。
+ * 聚焦核心差異化價值（Core IP）：
+   我們不重複發明 Parser，也不一開始就自幹複雜的 Graph Engine；我們把精力投注在 Context Manager（上下文精簡與語意壓縮）、Analysis Pipeline（分析邏輯） 與 Evidence-backed Report Generator（可驗證的交接報告） 上。這才是讓資安稽核與架構師願意買單的關鍵能力。
+二、 關於 ISO 27001 的審查現實
+你提到的補充完全正確。在資安稽核中：
+ * Hash-chained Event Log 解決的是 Integrity（完整性與防篡改） 的技術層面。
+ * 但 ISO 27001 ISMS 認證更看重的是管理與防禦縱深（Defense-in-depth）：例如資料庫檔案的作業系統層級權限（ACL）、DB 帳號與應用程式帳號的分離、稽核日誌的不可抹除性（WORM 儲存或定時異地備份至唯讀區）、以及金鑰管理（Key Management）。
+因此，在 MVP 階段，我們將 SQLite 視為「技術除錯與會話日誌（Execution Trace）」的儲存媒介，而不宣稱其直接等同於 ISO 27001 合規憑證；企業級合規則透過後續的「日誌匯出與唯讀封存機制」來滿足。
+三、 執行「故障注入測試（Failure Injection Test）」的具體腳本規劃
+你提出的七步驟測試非常棒，這正是驗證開源專案能否在地端小模型（如 Qwen 7B/14B）環境下存活的黃金試金石。我們可以直接把這套測試標準化為 MVP 的驗收標準：
+| 測試階段 | 故障注入動作 | 預期系統行為 (Pass Criteria) |
+|---|---|---|
+| 1. 正常啟動 | 丟入 50 個 Java 舊系統檔案 | 成功透過 JavaParser / CodeGraph 建立本地 SQLite 索引 |
+| 2. Context 瀕臨滿載 | 模擬 Prompt 達到模型極限（如 80%） | 觸發 Semantic Checkpoint，將已驗證事實寫入 DB，清空舊對話 |
+| 3. 強制中斷 (Crash) | 在分析到第 25 個檔案時 kill -9 Python Process | 程式崩潰，但 SQLite 中的 Checkpoint 停在正確的斷點 |
+| 4. 外部干擾 | 關閉 Ollama 服務 / 或手動修改已分析的某個 Java 檔 | 系統重啟後進行 Environment Revalidation，偵測到檔案 Hash 變更，標記 REQUIRES_REVIEW |
+| 5. 恢復執行 (Resume) | 重新啟動服務，指定原 Task ID 繼續執行 | 系統自動略過已完成部分，修復受影響的檔案，從斷點接續 |
+| 6. 模型切換 | 在恢復時將底層模型從 Qwen 7B 換成 14B | 藉由 Semantic Checkpoint 中的結構化事實（非肥大對話紀錄），新模型無縫接續任務 |
+| 7. 驗證產出 | 任務完成後輸出交接報告 | 報告中每一個呼叫鏈與結論，皆附帶對應的原始碼檔案與行號證據 |
+四、 下一步行動建議
+按照你的思路，我們不寫冗長的文件，直接動手做 PoC 驗證：
+ * 環境備妥：準備一包包含 30~50 個經典 Java 專案檔案（或直接拿開源的舊版 Java 專案如 BugNET 的部分原始碼）。
+ * 組合測試：以 CONTINUUM 邏輯 + 本地 SQLite + CodeGraph/JavaParser + Ollama (Qwen) 搭建一個最小可行性腳本。
+ * 跑一次上述的故障注入測試。
+
+Show more
+
+這份規劃已經可以從「架構討論」進入「工程驗證」階段。我認同直接做 PoC，但在開始寫程式前，我建議再補上幾個關鍵設計，避免測試全部通過，實際上卻沒有驗證到真正的核心能力。
+
+一、先修正四個工程細節
+1. 不要讓 CodeGraph 與 Runtime 直接共用資料表
+
+可以共用 SQLite 作為儲存媒介，但必須區分資料責任。
+
+資料模組	負責元件	主要內容
+Code Index	CodeGraph / JavaParser	檔案、類別、方法、呼叫關係
+Task State	Long Task Runtime	任務狀態、執行進度、Checkpoint
+Evidence Store	Evidence Manager	原始碼位置、Hash、分析證據
+Analysis Result	Analysis Pipeline	已驗證事實、分析結果、待確認事項
+Execution Event	Runtime	工具執行紀錄、錯誤、重試、恢復紀錄
+
+原則：共用儲存，不共用資料所有權。
+
+例如 CodeGraph 可以更新索引，但不能直接修改 Runtime 的 Checkpoint。
+
+2. Context 達到 80% 不代表直接清空對話
+
+建議改成以下流程：
+
+監控 Context 使用量
+        │
+        ▼
+是否達到 Checkpoint 門檻？
+        │
+        ▼
+整理目前分析成果
+        │
+        ▼
+將成果轉成結構化資料
+        │
+        ▼
+保存 Evidence + Checkpoint
+        │
+        ▼
+驗證資料已成功寫入
+        │
+        ▼
+建立新的 Context
+        │
+        ▼
+繼續執行原任務
+
+這裡最重要的是：
+
+不能只保存「目前分析到第幾個檔案」。
+
+必須保存已確認的分析事實。
+
+必須保存尚未完成的分析項目。
+
+必須保存每項結論對應的程式碼證據。
+
+必須確認 Checkpoint 成功寫入後，才允許捨棄舊 Context。
+
+否則只是清空對話，並不是真正的任務接續。
+
+3. 檔案異動後，不能只標記 REQUIRES_REVIEW
+
+應該進一步進行依賴影響分析。
+
+例如：
+
+OrderService.java
+       │
+       ├── OrderDAO.java
+       ├── OrderDTO.java
+       └── OrderMapper.java
+
+假設 OrderDAO.java 被修改：
+
+比對修改前後 SHA-256。
+
+標記 OrderDAO 的分析結果失效。
+
+查詢依賴圖，找出受影響的類別與呼叫鏈。
+
+只重新分析受影響的部分。
+
+保留未受影響的已驗證成果。
+
+這樣才能真正達成增量恢復，而不是每次恢復都重新掃描整個專案。
+
+4. 模型切換必須保存分析版本資訊
+
+Qwen 7B 換成 14B 時，不應只記錄模型名稱。
+
+至少要保存：
+
+欄位	用途
+model_name	模型名稱
+model_version	模型版本或 Tag
+prompt_version	分析 Prompt 版本
+parser_version	Parser 版本
+analysis_schema	結構化輸出格式版本
+source_hash	原始碼版本
+checkpoint_version	Checkpoint 格式版本
+
+這樣才能追蹤模型切換前後的分析差異。
+
+二、PoC 建議採用的最小架構
+
+第一版不需要完整 Web UI，也不需要先建置複雜的 Agent 系統。
+
+┌──────────────────────────────────────────┐
+│              CLI / Task API              │
+│                                          │
+│  create-task / run / pause / resume      │
+│  status / report / inject-failure        │
+└───────────────────┬──────────────────────┘
+                    │
+┌───────────────────▼──────────────────────┐
+│             Long Task Runtime            │
+│                                          │
+│  Task Scheduler                          │
+│  Context Manager                         │
+│  Checkpoint Manager                      │
+│  Recovery Manager                        │
+│  Model Adapter                           │
+└───────────────────┬──────────────────────┘
+                    │
+┌───────────────────▼──────────────────────┐
+│             Code Intelligence             │
+│                                          │
+│  JavaParser                              │
+│  CodeGraph Adapter                       │
+│  Dependency Analyzer                     │
+│  Evidence Collector                      │
+└───────────────────┬──────────────────────┘
+                    │
+┌───────────────────▼──────────────────────┐
+│             Analysis Pipeline            │
+│                                          │
+│  Ollama / Qwen                           │
+│  Fact Extraction                         │
+│  Relationship Analysis                   │
+│  Evidence Validation                     │
+│  Report Generator                        │
+└───────────────────┬──────────────────────┘
+                    │
+┌───────────────────▼──────────────────────┐
+│             Persistence Layer             │
+│                                          │
+│  SQLite                                  │
+│  Task State / Checkpoint                 │
+│  Evidence / Analysis Result              │
+│  Execution Event                         │
+└──────────────────────────────────────────┘
+第一版技術選型
+元件	建議技術	第一版責任
+開發語言	Python	Runtime 與流程控制
+Java Parser	JavaParser	Java 語法與符號解析
+多語言 Parser	Tree-sitter	預留擴充
+Code Graph	CodeGraph PoC	索引及關係查詢
+AI Runtime	Ollama	本地模型推論
+AI Model	Qwen 7B / 14B	程式碼語意分析
+Persistence	SQLite	任務及分析狀態
+Hash	SHA-256	檔案版本驗證
+Report	Markdown / JSON	交接報告
+
+一個重要提醒：BugNET 是 .NET/C# 系統，不適合直接拿來驗證 JavaParser。 如果要測 JavaParser，應使用 Java 專案；若要測多語言能力，則可以另外增加 C# 測試組。
+
+三、將七項測試轉成正式驗收標準
+
+我建議不要只驗證「程式有沒有重新啟動」，而要驗證恢復前後的資料一致性。
+
+測試項目	核心驗收條件
+初始索引	50 個檔案均有索引紀錄及 Hash
+Context 壓縮	Checkpoint 保存完整，無已確認事實遺失
+強制中斷	Kill Process 後可以從最後一筆有效 Checkpoint 恢復
+外部干擾	可以辨識 Ollama 中斷及原始碼異動
+任務恢復	已完成且未受影響的工作不重複執行
+模型切換	7B 與 14B 可以讀取相同 Checkpoint Schema
+報告驗證	每項程式碼結論都能追溯到檔案、行號及 Hash
+
+另外增加三項我認為更重要的測試：
+
+測試 8：重複執行（Idempotency）
+
+在工具執行完成、但 Checkpoint 尚未更新時強制中斷。恢復後不得產生重複資料或重複副作用。
+
+測試 9：Checkpoint 損毀
+
+人為修改 Checkpoint JSON 或 SQLite 資料，確認系統能偵測資料不一致，而不是直接使用錯誤狀態繼續執行。
+
+測試 10：分析結果可追溯
+
+隨機抽取 20 項分析結論，人工核對其原始碼行號、呼叫關係及證據是否正確。
+
+這三項測試比單純確認程式能否 Resume 更能反映企業實際使用價值。
+
+四、我建議 MVP 分成三個里程碑
+里程碑	開發範圍	完成標準
+POC-1：長任務恢復	SQLite、Task Runtime、Checkpoint、Crash Recovery	中斷後能正確接續
+POC-2：程式碼理解	JavaParser、CodeGraph、Ollama	能分析 Java 類別及呼叫關係
+POC-3：整合驗證	Context Manager、Evidence、模型切換、報告	中斷後能接續分析並產生可追溯報告
+
+開發順序很重要：先驗證長任務恢復，再整合程式碼理解。
+
+如果一開始就把 CONTINUUM、CodeGraph、JavaParser、Ollama 全部整合，最後即使失敗，也很難判斷究竟是哪個元件造成問題。
+
+五、第一個 PoC 的真正驗證目標
+
+我認為整個產品最重要的不是「AI 能不能分析 50 個 Java 檔案」。
+
+而是以下這個情境：
+
+AI 已經花費兩個小時分析一套舊系統，完成 70% 的工作。此時 Python Process 被強制終止，電腦重新啟動，原始碼又有部分異動。重新啟動後，即使更換 AI 模型，也能辨識哪些成果仍然有效、哪些需要重做，最後接續完成原本的任務。
+
+如果這個情境可以可靠通過，就已經驗證了產品最重要的技術核心。
+
+我的建議是先實作 POC-1，不急著整合 CONTINUUM。 先建立一個獨立的 Python Runtime，定義 Task、Checkpoint、Evidence、Event 四種資料物件，跑通 Crash → Restart → Resume。接著再把 CONTINUUM 接進來，測試它能否取代或改善自研 Runtime 的恢復機制。
+
+這樣才能客觀比較「採用 CONTINUUM」與「自行開發 Runtime」的成本、可靠性及可控性。
+
+If you want, I can:
+
+繼續詳述MVP設計架構
+
+展開比較測試細節與計劃
+
+闡述ISO 27001在Hash-chained Event Log中的具體應用限制
+
+ChatGPT is AI and can make mistakes.

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://handoff.local/schemas/manifests.schema.json",
+  "$defs": {
+    "sha256": {"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "version": {"type":"string","pattern":"^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "file": {
+      "type":"object","additionalProperties":false,
+      "required":["path","size_bytes","sha256"],
+      "properties":{"path":{"type":"string","minLength":1},"size_bytes":{"type":"integer","minimum":0},"sha256":{"$ref":"#/$defs/sha256"}}
+    }
+  },
+  "oneOf": [
+    {
+      "title":"CorpusManifest","type":"object","additionalProperties":false,
+      "required":["kind","version","source_url","commit","license","files","mutations"],
+      "properties":{
+        "kind":{"const":"corpus"},"version":{"$ref":"#/$defs/version"},"source_url":{"type":"string","format":"uri"},
+        "commit":{"type":"string","pattern":"^[0-9a-f]{40}$"},"license":{"const":"Apache-2.0"},
+        "files":{"type":"array","minItems":30,"maxItems":50,"items":{"$ref":"#/$defs/file"}},
+        "mutations":{"type":"array","minItems":3,"items":{"type":"object","additionalProperties":false,"required":["id","patch_sha256","expected_impacts"],"properties":{"id":{"type":"string"},"patch_sha256":{"$ref":"#/$defs/sha256"},"expected_impacts":{"type":"array","minItems":1,"items":{"type":"string"}}}}}
+      }
+    },
+    {
+      "title":"EnvironmentManifest","type":"object","additionalProperties":false,
+      "required":["kind","version","os","arch","java","maven","ollama","models","dependencies","status"],
+      "properties":{
+        "kind":{"const":"environment"},"version":{"$ref":"#/$defs/version"},"os":{"type":"string"},"arch":{"type":"string"},
+        "java":{"type":"object","required":["version","vendor"],"properties":{"version":{"const":"21"},"vendor":{"type":"string"}},"additionalProperties":false},
+        "maven":{"const":"3.10.0"},"ollama":{"const":"0.40.14"},
+        "models":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"object","required":["tag","digest"],"properties":{"tag":{"enum":["qwen3:8b","qwen3:14b"]},"digest":{"$ref":"#/$defs/sha256"}},"additionalProperties":false}},
+        "dependencies":{"type":"array","items":{"type":"object","required":["coordinate","version","sha256"],"properties":{"coordinate":{"type":"string"},"version":{"type":"string"},"sha256":{"$ref":"#/$defs/sha256"}},"additionalProperties":false}},
+        "status":{"const":"READY"}
+      }
+    }
+  ]
+}

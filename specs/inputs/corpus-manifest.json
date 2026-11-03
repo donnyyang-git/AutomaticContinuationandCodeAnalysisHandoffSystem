@@ -1,0 +1,244 @@
+{
+  "commit": "8f11fab492a473d9f98a4eb71de0af8d565f38fe",
+  "files": [
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/domain/Account.java",
+      "sha256": "01259c994386d20f181be561f2e02f6f9812b3a21aa2542f5144ba1d75e556fc",
+      "size_bytes": 7677
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/domain/Cart.java",
+      "sha256": "cc76c778bac4bf78a3ee68e586d6bd176530890cf4a6df88745a7e4a8b3961c3",
+      "size_bytes": 3948
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/domain/CartItem.java",
+      "sha256": "c1c287419c491c945a3168c28a2a7ae969a3ea54d0fac3c6f3b6f571166283ac",
+      "size_bytes": 2584
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/domain/Category.java",
+      "sha256": "2bb89d68af53cc59b82242459034c3ba20cbbf6a4114d07f84f3e93048f61256",
+      "size_bytes": 2133
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/domain/Item.java",
+      "sha256": "59d553d37f0a9b1ea0ad495395f27446e73a4a5b410b486373a7c26ac7799ece",
+      "size_bytes": 5600
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/domain/LineItem.java",
+      "sha256": "17a5adc85e661d18610abe7d8839eb3229d72573d2d118ed58efc108c980a042",
+      "size_bytes": 4116
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/domain/Order.java",
+      "sha256": "188720375fd13ccf01f200c4204110df8a5598a62cf789ab2612402e102bc7f1",
+      "size_bytes": 13954
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/domain/Product.java",
+      "sha256": "9d71ea77b75f2c512561ed86ca95e07d6a6ed7bcb11fcf13a68159854263914f",
+      "size_bytes": 2509
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/domain/Sequence.java",
+      "sha256": "ae91d418957b50540e141d266e54d26c85cd6ab49181560514f5184c4f59d75f",
+      "size_bytes": 1908
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/mapper/AccountMapper.java",
+      "sha256": "136fd34e96f573e5b218220201f7840d81d067a7a636423faea3ca984d252639",
+      "size_bytes": 2085
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/mapper/CategoryMapper.java",
+      "sha256": "877da7d4f3cd6655dabca96db659c4a2b614750f769cb657098e84d2b25ad1a8",
+      "size_bytes": 1160
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/mapper/ItemMapper.java",
+      "sha256": "9439638da8ca3b49675b492090d00e4b21382079172c55395648ee80269e071e",
+      "size_bytes": 1542
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/mapper/LineItemMapper.java",
+      "sha256": "bc3afaebfffb093c4f14bcdf1075b0e6a6489c6cccb5088ffa4872fec122810b",
+      "size_bytes": 1193
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/mapper/OrderMapper.java",
+      "sha256": "1612d798c68bec9b52db9da69ee3c51d9ee816e57b006369f4028dc42c29b974",
+      "size_bytes": 1443
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/mapper/ProductMapper.java",
+      "sha256": "8317edeb18c24cb0e7df84a8f4cb58071a7dfd8e054fdd1ba7b94fb1bc826f47",
+      "size_bytes": 1414
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/mapper/SequenceMapper.java",
+      "sha256": "3801a0a90aa0788cc017fbf1cc54b4d6082da864c21abd63700daa10fe76b5e3",
+      "size_bytes": 1144
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/service/AccountService.java",
+      "sha256": "6ce2ab83615f0e0821a9d6ea5265dbc2cbd24229be5d3a06c495e897a2bf77d3",
+      "size_bytes": 2598
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/service/CatalogService.java",
+      "sha256": "5a70bf4645734f66bda050f5d3dc4381c905c2316c641e2f70a5bd3ba4448b6b",
+      "size_bytes": 3935
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/service/OrderService.java",
+      "sha256": "2ef96c48d2ab96a70dea782285d81d55033741c1cf4e8413e91a650d9601f6a4",
+      "size_bytes": 4419
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/web/configuration/StaxFactoryInitializationListener.java",
+      "sha256": "dc290fd84eb1b94e899096523d1ee52cb62fe504302deb3047ed09721c1b352e",
+      "size_bytes": 1706
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/web/controllers/AccountController.java",
+      "sha256": "864f0edf63ab6258f55d9c98394d1306edce7ca5d65c016f830f86332c8f5931",
+      "size_bytes": 7165
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/web/controllers/CartController.java",
+      "sha256": "d7e9b77797f4646ae4d356e10ced9d84d94773c7b38f5c96d89ffca3da81294b",
+      "size_bytes": 5599
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/web/controllers/CatalogController.java",
+      "sha256": "8935af254786f577a9c6f41fca70d9461ef4eb6e869ef6f369d51783d9715651",
+      "size_bytes": 4180
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/web/controllers/OrderController.java",
+      "sha256": "03ecf43067ed87c4f2055c0f2607d0ff1ce1344d5fdab26f74e2030a861a9960",
+      "size_bytes": 9007
+    },
+    {
+      "path": "src/main/java/org/mybatis/jpetstore/web/controllers/RootController.java",
+      "sha256": "1e78aa815ee8ca60948501621bee43db818e94415024e970cfe3278a23c90ace",
+      "size_bytes": 1174
+    },
+    {
+      "path": "src/main/resources/org/mybatis/jpetstore/mapper/AccountMapper.xml",
+      "sha256": "353d39d2e52537cd8fdc41e4005ec9b285b9e3f2ba9dbb876e060b3e38e662d4",
+      "size_bytes": 4662
+    },
+    {
+      "path": "src/main/resources/org/mybatis/jpetstore/mapper/CategoryMapper.xml",
+      "sha256": "47c49fde4a08a32b962d16e21578f68eae57283817c6ab347436f5a5ca979f69",
+      "size_bytes": 1290
+    },
+    {
+      "path": "src/main/resources/org/mybatis/jpetstore/mapper/ItemMapper.xml",
+      "sha256": "aad4ebd883667c8571ab7e64a519a070bc0a727bbe45d6f0d9d9896c74a2b9f3",
+      "size_bytes": 2402
+    },
+    {
+      "path": "src/main/resources/org/mybatis/jpetstore/mapper/LineItemMapper.xml",
+      "sha256": "0d7c3ae9296a569ae9a3cf2bbcf17e88f454fcb811a29699c7f00f04b8226020",
+      "size_bytes": 1354
+    },
+    {
+      "path": "src/main/resources/org/mybatis/jpetstore/mapper/OrderMapper.xml",
+      "sha256": "01c0fc441821ad6f0b85595c40ceb7fd7254f09b620a83d0b00a7af6e6adb4f4",
+      "size_bytes": 3535
+    },
+    {
+      "path": "src/main/resources/org/mybatis/jpetstore/mapper/ProductMapper.xml",
+      "sha256": "0e56dc60cace3138f8c49a3f0f1b42e5c3210880c319748d09c8783ba5e8a652",
+      "size_bytes": 1597
+    },
+    {
+      "path": "src/main/resources/org/mybatis/jpetstore/mapper/SequenceMapper.xml",
+      "sha256": "4233892294237a65508189ec68ba97ae672fb4d3075195f913a811d312e82420",
+      "size_bytes": 1179
+    },
+    {
+      "path": "src/main/webapp/WEB-INF/applicationContext.xml",
+      "sha256": "6f60e421ebcc2c59684eee62677513a0a703b34783965598c5fa8e11f0182416",
+      "size_bytes": 2860
+    },
+    {
+      "path": "src/main/webapp/WEB-INF/beans.xml",
+      "sha256": "cd6bee75659c37acaae4c33bfa5925f9ab18610256fa4a5f499f517935510aad",
+      "size_bytes": 979
+    },
+    {
+      "path": "src/main/webapp/WEB-INF/jsp/account/SignonForm.jsp",
+      "sha256": "e0d20a0cfe3f0d5a6ecb73c48e58b98b176d72f6607c4a9ac1381320b6171b5c",
+      "size_bytes": 1292
+    },
+    {
+      "path": "src/main/webapp/WEB-INF/jsp/cart/Cart.jsp",
+      "sha256": "5eaebf3b8faf0cbb90656f8255f5eb5e17e86ccad015b8005f5d62e71b483f58",
+      "size_bytes": 3814
+    },
+    {
+      "path": "src/main/webapp/WEB-INF/jsp/catalog/Category.jsp",
+      "sha256": "098aca43d9b538bb57ba1c2330e2dc47b073b655f3c365b4e664b842d4e5a852",
+      "size_bytes": 1369
+    },
+    {
+      "path": "src/main/webapp/WEB-INF/jsp/catalog/Item.jsp",
+      "sha256": "de47078699770786fb31c8efd77ce8f4bdabe89262ec3df63f3ca80ffc8df9ec",
+      "size_bytes": 1917
+    },
+    {
+      "path": "src/main/webapp/WEB-INF/jsp/catalog/Main.jsp",
+      "sha256": "af696f55b8e42cfbdef16573e3b14178e9131da1589151dc6a7c44b4233ab42a",
+      "size_bytes": 3554
+    },
+    {
+      "path": "src/main/webapp/WEB-INF/jsp/order/NewOrderForm.jsp",
+      "sha256": "936af15bef0c64e4af07af992c5c4e5429eecd9409e203c0a0e57b2ca8a31451",
+      "size_bytes": 3561
+    },
+    {
+      "path": "src/main/webapp/WEB-INF/jsp/order/ViewOrder.jsp",
+      "sha256": "754d518faaa2450f91822fc6002ae5eeb30f6090baac62e883f7cfb3770a9898",
+      "size_bytes": 5738
+    }
+  ],
+  "kind": "corpus",
+  "license": "Apache-2.0",
+  "mutations": [
+    {
+      "expected_impacts": [
+        "CatalogService",
+        "CatalogController",
+        "AccountController",
+        "catalog claims"
+      ],
+      "id": "M1",
+      "patch_sha256": "7888030551294bb636f0756d2f09b27308da5427a1e9d82f6ca1fcdac975a51b"
+    },
+    {
+      "expected_impacts": [
+        "OrderMapper.xml",
+        "order persistence claims",
+        "order data-flow claims"
+      ],
+      "id": "M2",
+      "patch_sha256": "431bf30c28f0bf2c3783c6140b6b2f23dd038596238169f164a219143e9742a1"
+    },
+    {
+      "expected_impacts": [
+        "AccountController",
+        "account view relation",
+        "account entry claims"
+      ],
+      "id": "M3",
+      "patch_sha256": "b85e237fcb43b45503e53b22eb065c9de80ab101c1f0cdda04f2e9c3cb221102"
+    }
+  ],
+  "source_url": "https://github.com/mybatis/jpetstore-6",
+  "version": "1.0.0"
+}

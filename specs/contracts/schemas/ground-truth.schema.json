@@ -1,0 +1,15 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://handoff.local/schemas/ground-truth.schema.json",
+  "type":"object","additionalProperties":false,
+  "required":["version","corpus_version","generation_note","types","methods","direct_calls","xml_links","view_links","unknowns"],
+  "properties":{
+    "version":{"const":"1.0.0"},"corpus_version":{"const":"1.0.0"},"generation_note":{"type":"string"},
+    "types":{"type":"array","minItems":25,"items":{"type":"object","required":["qualified_name","kind","path","line"],"properties":{"qualified_name":{"type":"string"},"kind":{"type":"string"},"path":{"type":"string"},"line":{"type":"integer","minimum":1}},"additionalProperties":false}},
+    "methods":{"type":"array","minItems":1,"items":{"type":"object","required":["method_id","qualified_type","name","parameters","return_type","path","line"],"properties":{"method_id":{"type":"string"},"qualified_type":{"type":"string"},"name":{"type":"string"},"parameters":{"type":"array","items":{"type":"string"}},"return_type":{"type":"string"},"path":{"type":"string"},"line":{"type":"integer","minimum":1}},"additionalProperties":false}},
+    "direct_calls":{"type":"array","items":{"type":"object","required":["caller","target","member","qualifier","path","line"],"properties":{"caller":{"type":"string"},"target":{"type":"string"},"member":{"type":"string"},"qualifier":{"type":["string","null"]},"path":{"type":"string"},"line":{"type":["integer","null"],"minimum":1}},"additionalProperties":false}},
+    "xml_links":{"type":"array","items":{"type":"object","required":["mapper_method","statement_kind","path"],"properties":{"mapper_method":{"type":"string"},"statement_kind":{"enum":["SELECT","INSERT","UPDATE","DELETE"]},"path":{"type":"string"}},"additionalProperties":false}},
+    "view_links":{"type":"array","items":{"type":"object","required":["controller","view","path","authority"],"properties":{"controller":{"type":"string"},"view":{"type":"string"},"path":{"type":"string"},"authority":{"enum":["PARSER","CONFIG"]}},"additionalProperties":false}},
+    "unknowns":{"type":"array","items":{"type":"object","required":["subject","reason"],"properties":{"subject":{"type":"string"},"reason":{"type":"string"}},"additionalProperties":false}}
+  }
+}

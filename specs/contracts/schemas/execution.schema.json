@@ -1,0 +1,27 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://handoff.local/schemas/execution.schema.json",
+  "$defs":{
+    "sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "version":{"type":"string","pattern":"^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "commandResult":{"type":"object","additionalProperties":false,"required":["command","exit_code","observed_at","stdout_sha256","stderr_sha256"],"properties":{"command":{"type":"string"},"exit_code":{"type":"integer"},"observed_at":{"type":"string","format":"date-time"},"stdout_sha256":{"$ref":"#/$defs/sha256"},"stderr_sha256":{"$ref":"#/$defs/sha256"}}}
+  },
+  "oneOf":[
+    {
+      "title":"HandoffManifest","type":"object","additionalProperties":false,
+      "required":["kind","spec_id","spec_version","work_packet_id","contract_version","corpus_version","environment_version","changed_files","artifacts","verification","unresolved_blockers","next_preconditions","completed_at"],
+      "properties":{
+        "kind":{"const":"handoff"},"spec_id":{"type":"string"},"spec_version":{"$ref":"#/$defs/version"},"work_packet_id":{"type":"string"},"contract_version":{"$ref":"#/$defs/version"},"corpus_version":{"$ref":"#/$defs/version"},"environment_version":{"$ref":"#/$defs/version"},
+        "changed_files":{"type":"array","items":{"type":"string"},"uniqueItems":true},
+        "artifacts":{"type":"array","items":{"type":"object","required":["path","sha256"],"properties":{"path":{"type":"string"},"sha256":{"$ref":"#/$defs/sha256"}},"additionalProperties":false}},
+        "verification":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/commandResult"}},
+        "unresolved_blockers":{"type":"array","items":{"type":"string"}},"next_preconditions":{"type":"array","items":{"type":"string"}},"completed_at":{"type":"string","format":"date-time"}
+      }
+    },
+    {
+      "title":"Blocker","type":"object","additionalProperties":false,
+      "required":["kind","blocker_id","spec_id","work_packet_id","code","observed","expected","attempted","required_decision","created_at"],
+      "properties":{"kind":{"const":"blocker"},"blocker_id":{"type":"string","format":"uuid"},"spec_id":{"type":"string"},"work_packet_id":{"type":"string"},"code":{"type":"string"},"observed":{"type":"string"},"expected":{"type":"string"},"attempted":{"type":"array","items":{"type":"string"}},"required_decision":{"type":"string"},"created_at":{"type":"string","format":"date-time"}}
+    }
+  ]
+}
