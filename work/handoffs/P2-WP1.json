@@ -1,0 +1,49 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-2",
+  "spec_version": "1.0.0",
+  "work_packet_id": "P2-WP1",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "repository_revision": "b7b3609a",
+  "changed_files": [
+    "src/main/java/io/handoff/cli/HandoffCommand.java",
+    "src/main/java/io/handoff/index/JavaIndexer.java",
+    "src/main/resources/db/migration/schema.sql",
+    "src/test/java/io/handoff/index/JavaIndexerTest.java",
+    "src/test/java/io/handoff/persistence/PersistenceSchemaBootstrapperTest.java"
+  ],
+  "artifacts": [
+    {
+      "path": "work/handoffs/P2-WP1/automatic-continuation-poc.jar",
+      "sha256": "fff434a6ad9caaab65e52b25f6e4d70cb8d20b231e43d5462011869a8494faba"
+    }
+  ],
+  "verification": [
+    {
+      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q -Dtest=JavaIndexerTest,PersistenceSchemaBootstrapperTest test",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "JavaParser indexing, diagnostic persistence, schema bootstrap, and repeat-index idempotency passed."
+    },
+    {
+      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q test package",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "Full test suite and shaded package completed successfully."
+    },
+    {
+      "command": "java -jar target/automatic-continuation-poc.jar --help",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "CLI exposes the index command."
+    }
+  ],
+  "unresolved_blockers": [],
+  "next_preconditions": [
+    "Accept P2-WP1 handoff.",
+    "Run P2-WP2 against this accepted repository revision."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}
