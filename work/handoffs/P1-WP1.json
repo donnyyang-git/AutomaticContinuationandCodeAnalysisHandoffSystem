@@ -1,0 +1,48 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-1",
+  "spec_version": "1.0.0",
+  "work_packet_id": "P1-WP1",
+  "work_packet_version": "1.0.0",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "repository_revision": "43b2cdc026ef1b70f028938ec8cda92716045a70",
+  "changed_files": [
+    ".gitignore",
+    "src/main/java/io/handoff/cli/HandoffCommand.java",
+    "src/main/java/io/handoff/runtime/RuntimeException.java",
+    "src/main/java/io/handoff/runtime/TaskRuntime.java",
+    "src/main/java/io/handoff/runtime/TaskState.java",
+    "src/main/java/io/handoff/runtime/WorkItem.java",
+    "src/test/java/io/handoff/cli/HandoffRuntimeCliTest.java",
+    "src/test/java/io/handoff/runtime/TaskRuntimeTest.java"
+  ],
+  "artifact_paths": [
+    "work/handoffs/P1-WP1/automatic-continuation-poc.jar"
+  ],
+  "artifact_sha256": {
+    "work/handoffs/P1-WP1/automatic-continuation-poc.jar": "cf176a98a329355c370b14fb15e233cde02a9cc9055be8b846ec9f077a4e58eb"
+  },
+  "schema_version": "1.0.0",
+  "database_version": "1.0.0",
+  "verification_commands": [
+    "mvn -o -q test",
+    "mvn -o -q -DskipTests package",
+    "mvn -o -q -Dtest=HandoffRuntimeCliTest test",
+    "java -jar target/automatic-continuation-poc.jar --help"
+  ],
+  "verification_exit_codes": [0, 0, 0, 0],
+  "verification_results": [
+    "Complete test suite passed under setup-poc-env.ps1 with Java 21.0.13 and Maven 3.10.0.",
+    "Shaded package completed successfully.",
+    "CLI smoke passed: three deterministic work items produced one COMMITTED and two PENDING after --pause-after 1; resume produced three COMMITTED and COMPLETED.",
+    "Shaded CLI help listed run, pause, and resume."
+  ],
+  "unresolved_blockers": [],
+  "next_preconditions": [
+    "Accept P1-WP1 handoff.",
+    "Run P1-WP2 against repository revision 43b2cdc026ef1b70f028938ec8cda92716045a70."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}
