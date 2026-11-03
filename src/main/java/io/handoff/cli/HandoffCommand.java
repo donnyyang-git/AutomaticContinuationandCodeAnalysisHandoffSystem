@@ -1,5 +1,6 @@
 package io.handoff.cli;
 import io.handoff.index.JavaIndexer;
+import io.handoff.index.CodeGraph;
 import java.io.IOException;
 
 import io.handoff.persistence.ConnectionFactory;
@@ -38,7 +39,8 @@ import picocli.CommandLine.Model.CommandSpec;
                 HandoffCommand.PauseCommand.class,
                 HandoffCommand.ResumeCommand.class,
                 HandoffCommand.InjectFailureCommand.class,
-                HandoffCommand.IndexCommand.class})
+                HandoffCommand.IndexCommand.class,
+                HandoffCommand.QueryCommand.class})
 public final class HandoffCommand implements Runnable {
     static final int SUCCESS = 0;
     static final int PRECONDITION_ERROR = 10;
@@ -211,8 +213,40 @@ public final class HandoffCommand implements Runnable {
         }
     }
 
-    private static void runAtomic(Connection connection, String taskId, int pauseAfter)
-            throws Exception {
+
+    @Command(name = "query", description = "Query code graph callers, callees, or reverse dependents.")
+    static final class QueryCommand implements Callable<Integer> {
+        @ParentCommand HandoffCommand parent;
+        @Parameters(index = "0", description = "Direction: callers, callees, or reverseDependents.") String direction;
+        @Parameters(index = "1", description = "Symbol ID.") String symbolId;
+        @Option(names = "--snapshot", required = true, paramLabel = "SNAPSHOT-ID") String snapshotId;
+
+        @Override
+        public Integer call() throws Exception {
+            try (Connection connection = openDatabase(parent)) {
+                CodeGraph graph = new CodeGraph(connection);
+                var relations = switch (direction) {
+                    case "callers" -> graph.callers(snapshotId, symbolId);
+                    case "callees" -> graph.callees(snapshotId, symbolId);
+                    case "reverseDependents" -> graph.reverseDependents(snapshotId, symbolId);
+                    default -> throw new io.handoff.runtime.RuntimeException("E_QUERY", "Unknown graph direction: " + direction);
+                };
+                PrintWriter out = parent.commandSpec.commandLine().getOut();
+                for (CodeGraph.Relation relation : relations) {
+                    out.printf("%s %s %s %s:%d%n", relation.kind(), relation.sourceSymbolId(),
+                            relation.targetSymbolId() == null ? relation.targetExternalName() : relation.targetSymbolId(),
+                            relation.evidencePath(), relation.evidenceLine());
+                }
+                out.flush();
+                return SUCCESS;
+            } catch (io.handoff.runtime.RuntimeException failure) {
+                return reportFailure(parent, failure);
+            } catch (SQLException failure) {
+                return reportFailure(parent, new io.handoff.runtime.RuntimeException("E_QUERY", failure.getMessage()));
+            }
+        }
+    }
+    private static void runAtomic(Connection connection, String taskId, int pauseAfter) throws Exception {
         TaskRuntime runtime = new TaskRuntime(connection);
         TaskRuntime.TaskInfo current = runtime.task(taskId);
         if (current.state() == TaskState.PAUSED || current.state() == TaskState.INTERRUPTED

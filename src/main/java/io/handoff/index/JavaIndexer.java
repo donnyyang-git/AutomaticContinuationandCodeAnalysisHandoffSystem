@@ -74,8 +74,8 @@ public final class JavaIndexer {
                     }
                     CompilationUnit unit = result.getResult().orElseThrow();
                     symbols += persistSymbols(connection, snapshotId, relative, unit, diagnostics);
+                    RelationIndexer.index(connection, snapshotId, relative, unit, diagnostics);
                     parsed++;
-                    probeSymbolResolution(unit, relative, diagnostics);
                 } catch (RuntimeException failure) {
                     diagnostics.add(new Diagnostic(relative, null, "PARSE", message(failure)));
                 }
