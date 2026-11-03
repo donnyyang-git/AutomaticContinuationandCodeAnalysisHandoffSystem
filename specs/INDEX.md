@@ -6,7 +6,7 @@ Execution order is normative.
 
 ## Gate
 
-The package may be executed only when `SPEC-MANIFEST.json` is `LOCKED`, all listed SHA-256 values match, and `environment-manifest.json` validates with status `READY`. The current workstation observation is `NOT_READY`; specification work can finish, implementation cannot start.
+The package may be executed only when `SPEC-MANIFEST.json` is `LOCKED`, all listed SHA-256 values match, and `environment-manifest.json` validates with status `READY`. The current workstation environment manifest is `READY`; execution gate is open for POC-0 provisioning and work packets.
 
 ## Sequence
 

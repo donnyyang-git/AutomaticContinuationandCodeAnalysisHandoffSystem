@@ -44,6 +44,7 @@ def main() -> int:
     try:
         validate_json("inputs/corpus-manifest.json", "contracts/schemas/manifests.schema.json")
         validate_json("inputs/ground-truth.json", "contracts/schemas/ground-truth.schema.json")
+        validate_json("inputs/environment-manifest.json", "contracts/schemas/manifests.schema.json")
     except Exception as exc:
         errors.append(f"JSON schema validation: {exc}")
 
