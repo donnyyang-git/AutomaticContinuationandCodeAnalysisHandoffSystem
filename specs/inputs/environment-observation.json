@@ -1,27 +1,39 @@
 {
   "kind": "environment-observation",
   "observed_at": "2026-11-03T00:00:00.000Z",
-  "os": "Windows 10.0.22631",
+  "os": "Windows 11 10.0.22631",
   "arch": "x64",
   "java": {
-    "version": "1.8.0_91",
-    "vendor": "Oracle Corporation",
-    "status": "MISMATCH",
+    "version": "21.0.13",
+    "vendor": "Eclipse Adoptium",
+    "status": "READY",
     "required": "OpenJDK 21"
   },
   "maven": {
-    "version": "3.9.6",
-    "status": "MISMATCH",
+    "version": "3.10.0",
+    "status": "READY",
     "required": "3.10.0"
   },
   "ollama": {
     "status": "MISSING",
     "required": "0.40.14"
   },
+  "lm_studio": {
+    "status": "AVAILABLE",
+    "endpoint": "http://127.0.0.1:1234/v1",
+    "api_mode": "openai-compatible",
+    "models": [
+      "qwen2.5-coder-7b-instruct",
+      "recursivesi/flint",
+      "deepseek/deepseek-r1-0528-qwen3-8b",
+      "qwen/qwen3.5-9b",
+      "google/gemma-4-e4b"
+    ]
+  },
   "models": [
-    {"tag": "qwen3:8b", "status": "MISSING"},
-    {"tag": "qwen3:14b", "status": "MISSING"}
+    {"tag": "qwen/qwen3.5-9b", "status": "CHAT_COMPLETION_VERIFIED", "pin_status": "UNPINNED_MODEL"},
+    {"tag": "deepseek/deepseek-r1-0528-qwen3-8b", "status": "AVAILABLE_VIA_LM_STUDIO", "pin_status": "UNPINNED_MODEL"}
   ],
-  "overall_status": "NOT_READY",
-  "required_action": "Provision the locked environment and replace this observation with a schema-valid environment-manifest.json before POC-0."
+  "overall_status": "READY",
+  "required_action": "Optional: capture LM Studio model digests later to change model pin status from UNPINNED_MODEL to PINNED."
 }

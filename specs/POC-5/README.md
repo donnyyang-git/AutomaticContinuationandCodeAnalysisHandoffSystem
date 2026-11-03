@@ -1,16 +1,16 @@
 # POC-5 — Model Switch, Review, and Deterministic Reports
 
-`spec_id: POC-5` · `spec_version: 1.0.0` · prerequisite: accepted `POC-4-final.json` and local Model A/B digests
+`spec_id: POC-5` · `spec_version: 1.0.0` · prerequisite: accepted `POC-4-final.json` and local Model A/B identifiers
 
 ## Goal
 
-Switch from `qwen3:8b` to `qwen3:14b` without overwriting history, resolve conflicts through auditable CLI review, and generate byte-deterministic Markdown/JSON reports exclusively from validated database state.
+Switch from Model A to Model B, with Ollama or LM Studio selected as the loopback provider, without overwriting history; resolve conflicts through auditable CLI review, and generate byte-deterministic Markdown/JSON reports exclusively from validated database state.
 
 ## Work packets
 
 ### P5-WP1 — Model-switch revisions
 
-Allowed: Analysis Pipeline model selector/revision logic, tests. Model identity is tag+digest. Switching model creates a new invocation and result revision for selected semantic work items; parser facts and unaffected structural index are reused. Old results remain immutable/readable. Equal normalized claims may be `CONFIRMED` as a new revision; differing material claims become `CONFLICTING` and open review.
+Allowed: Analysis Pipeline provider/model selector and revision logic, tests. Model identity is provider + endpoint + model tag/identifier, plus optional digest. Missing digest is recorded as `UNPINNED_MODEL` and disclosed in reports. Switching model or provider creates a new invocation and result revision for selected semantic work items; parser facts and unaffected structural index are reused. Old results remain immutable/readable. Equal normalized claims may be `CONFIRMED` as a new revision; differing material claims become `CONFLICTING` and open review.
 
 ### P5-WP2 — Review Manager and CLI
 
@@ -29,7 +29,7 @@ Render fixed Markdown headings from the same report model, not an LLM. Run the e
 ## Acceptance
 
 - Old Model A invocation/result rows unchanged after Model B run.
-- Every Model B result records tag+digest and revision.
+- Every Model B result records provider, endpoint, model identifier, pin status, and optional digest.
 - Material conflict blocks task until CLI review commit.
 - Review audit fields complete; bypass attempt exits 20.
 - Same post-review DB state produces byte-identical JSON and Markdown across two invocations.
@@ -49,4 +49,4 @@ Model overwrite, review bypass, LLM-authored final report, nondeterministic repo
 
 ## Handoff
 
-Emit `work/handoffs/POC-5-final.json` with both model digests, revision/conflict/review export, two-run report hashes, full scenario transcript, and final metric table. This accepted handoff freezes the Proposed benchmark for CONTINUUM comparison.
+Emit `work/handoffs/POC-5-final.json` with both model identifiers, optional digests and pin statuses, revision/conflict/review export, two-run report hashes, full scenario transcript, and final metric table. This accepted handoff freezes the Proposed benchmark for CONTINUUM comparison.

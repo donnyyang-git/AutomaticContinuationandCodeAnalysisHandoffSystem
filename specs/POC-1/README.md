@@ -4,7 +4,7 @@
 
 ## Goal
 
-Prove durable task lifecycle, atomic work-item commit, stable `operation_id`, pause, hard interruption, restart, and resume from the last committed checkpoint. Analysis payloads are deterministic local facts; JavaParser and Ollama remain out of scope.
+Prove durable task lifecycle, atomic work-item commit, stable `operation_id`, pause, hard interruption, restart, and resume from the last committed checkpoint. Analysis payloads are deterministic local facts; JavaParser and local LLM providers remain out of scope.
 
 ## Fixed contract summary
 

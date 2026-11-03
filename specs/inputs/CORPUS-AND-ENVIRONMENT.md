@@ -46,11 +46,12 @@ Required runtime:
 - Windows x64 or Linux x64 recorded in the manifest;
 - OpenJDK 21;
 - Maven 3.10.0;
-- Ollama 0.40.14;
-- local `qwen3:8b` and `qwen3:14b`, each with recorded digest;
+- one selected local provider: Ollama 0.40.14 or LM Studio 0.3.x+;
+- the provider's loopback OpenAI-compatible endpoint (`/v1/chat/completions`);
+- local Model A and Model B, each with a recorded provider-specific identifier; content digest SHOULD be recorded when available, otherwise pin status is `UNPINNED_MODEL`;
 - all Maven dependencies pre-resolved for offline execution.
 
-Current workstation observation at specification time: Maven 3.9.6 uses Java 8 and Ollama is absent. Therefore execution environment status is `NOT_READY`; provisioning is REQUIRED before POC-0. This observation does not alter required versions.
+Current workstation observation: Java 21, Maven 3.10.0, and the LM Studio loopback endpoint are available. The selected LM Studio model completed a chat request, but its content digest is unavailable through the exposed metadata, so the environment remains usable with `UNPINNED_MODEL` disclosure.
 
 ## Preflight
 
@@ -59,10 +60,11 @@ Before any work packet:
 ```text
 java -version                        # major 21
 mvn -version                         # 3.10.0 and Java 21
-ollama --version                     # 0.40.14
-ollama list                          # exact tags present
+ollama --version                     # if provider=ollama
+ollama list                          # identifiers and digests, if provider=ollama
+GET http://127.0.0.1:1234/v1/models # if provider=lm-studio
 mvn -o -q -DskipTests package        # no network
 handoff validate-spec --manifest specs/SPEC-MANIFEST.json
 ```
 
-Any mismatch produces `E_ENV_VERSION`, `E_MODEL_MISSING`, `E_CORPUS_HASH`, or `E_SPEC_HASH` and stops before repository mutation.
+Any mismatch produces `E_ENV_VERSION`, `E_MODEL_MISSING`, `E_LLM_UNAVAILABLE`, `E_CORPUS_HASH`, or `E_SPEC_HASH` and stops before repository mutation. Missing model digest does not produce an error; it records `UNPINNED_MODEL`.

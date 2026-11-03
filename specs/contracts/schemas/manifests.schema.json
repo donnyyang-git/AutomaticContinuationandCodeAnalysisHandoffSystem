@@ -23,12 +23,13 @@
     },
     {
       "title":"EnvironmentManifest","type":"object","additionalProperties":false,
-      "required":["kind","version","os","arch","java","maven","ollama","models","dependencies","status"],
+      "required":["kind","version","os","arch","java","maven","llm","models","dependencies","status"],
       "properties":{
         "kind":{"const":"environment"},"version":{"$ref":"#/$defs/version"},"os":{"type":"string"},"arch":{"type":"string"},
         "java":{"type":"object","required":["version","vendor"],"properties":{"version":{"const":"21"},"vendor":{"type":"string"}},"additionalProperties":false},
-        "maven":{"const":"3.10.0"},"ollama":{"const":"0.40.14"},
-        "models":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"object","required":["tag","digest"],"properties":{"tag":{"enum":["qwen3:8b","qwen3:14b"]},"digest":{"$ref":"#/$defs/sha256"}},"additionalProperties":false}},
+        "maven":{"const":"3.10.0"},
+        "llm":{"type":"object","required":["provider","endpoint","api_mode","version"],"properties":{"provider":{"enum":["ollama","lm-studio"]},"endpoint":{"type":"string","format":"uri","pattern":"^http://(127\\.0\\.0\\.1|localhost):[0-9]+(/v1)?$"},"api_mode":{"const":"openai-compatible"},"version":{"type":"string"}},"additionalProperties":false},
+        "models":{"type":"array","minItems":2,"items":{"type":"object","required":["tag"],"properties":{"tag":{"type":"string","minLength":1},"digest":{"$ref":"#/$defs/sha256"},"pin_status":{"enum":["PINNED","UNPINNED_MODEL"]}},"additionalProperties":false}},
         "dependencies":{"type":"array","items":{"type":"object","required":["coordinate","version","sha256"],"properties":{"coordinate":{"type":"string"},"version":{"type":"string"},"sha256":{"$ref":"#/$defs/sha256"}},"additionalProperties":false}},
         "status":{"const":"READY"}
       }

@@ -86,7 +86,14 @@ def main() -> int:
         errors.append(f"SQL validation: {exc}")
 
     contracts = (ROOT / "contracts/CANONICAL-CONTRACTS.md").read_text(encoding="utf-8")
-    for value in ("JavaParser symbol solver | 3.28.2", "SQLite JDBC | 3.54.1.0", "Ollama | 0.40.14", "qwen3:8b", "qwen3:14b"):
+    for value in (
+        "JavaParser symbol solver | 3.28.2",
+        "SQLite JDBC | 3.54.1.0",
+        "Local LLM transport | OpenAI-compatible HTTP (`/v1/chat/completions`)",
+        "Supported provider | Ollama 0.40.14 or LM Studio 0.3.x+",
+        "qwen3:8b",
+        "qwen3:14b",
+    ):
         if value not in contracts:
             errors.append(f"contract missing pinned value: {value}")
 

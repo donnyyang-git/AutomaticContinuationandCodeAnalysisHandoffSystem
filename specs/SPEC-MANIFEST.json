@@ -2,8 +2,8 @@
   "authoritative_files": [
     {
       "path": "CONTINUUM/README.md",
-      "sha256": "d5a63c3808d89fc1fc466dce0c82bdaa6dd0412eac0abd717ca06f164f16ab53",
-      "size_bytes": 5049
+      "sha256": "500a5cf70680888eb67852e5738a3989b717e4320b217bac5546d33150f849f1",
+      "size_bytes": 5082
     },
     {
       "path": "INDEX.md",
@@ -17,8 +17,8 @@
     },
     {
       "path": "POC-1/README.md",
-      "sha256": "422a579fd449f7cf6f05cc832cf044a335a3136895061f0aba0a158d3038116b",
-      "size_bytes": 3887
+      "sha256": "6e61f30cfc83c3ed36c14655299a44f7d0a9bad74efeba45672922f2a89b66a3",
+      "size_bytes": 3900
     },
     {
       "path": "POC-2/README.md",
@@ -27,8 +27,8 @@
     },
     {
       "path": "POC-3/README.md",
-      "sha256": "a77ad78e07c571e72b11c94968a51acbf26a5d226ba706f5d116ab914270a995",
-      "size_bytes": 3976
+      "sha256": "6b404a0b34464315b3d80993ecc570c01092dd280fc778e0868368daacb3a170",
+      "size_bytes": 4672
     },
     {
       "path": "POC-4/README.md",
@@ -37,23 +37,23 @@
     },
     {
       "path": "POC-5/README.md",
-      "sha256": "bbb4f7721a24621bf9683a0517914d7d781261a8735083f332ac3e659718f51a",
-      "size_bytes": 3614
+      "sha256": "de7ad9fe9abe29f0717c1ddd034bcae7293807a519f31b059cc235155cd3ac9a",
+      "size_bytes": 3909
     },
     {
       "path": "contracts/CANONICAL-CONTRACTS.md",
-      "sha256": "b6e39de234a8eaad9888c492d925e4fb9abeda7b3f12175f114b6ca8c2e97dbc",
-      "size_bytes": 8856
+      "sha256": "af6eb876f7a041c39e9586563cd623e308441724c7e8cb5c2c1642fc4c745f88",
+      "size_bytes": 10151
     },
     {
       "path": "contracts/ERROR-CATALOG.md",
-      "sha256": "529b754ae293aba4c4c713fc9774b198521f10898ee196ccce21552cedf8d789",
-      "size_bytes": 1541
+      "sha256": "097d4e4e14477b64fee6f9ad3ddf66a971b60d94f27098a90e4be01f3902f3ea",
+      "size_bytes": 1721
     },
     {
       "path": "contracts/schema.sql",
-      "sha256": "e3f248bea64778f0b0cc8604f264251f343bc15b53e4036cc6f8b23d2bea3055",
-      "size_bytes": 7528
+      "sha256": "1b0bc6f026a13413798faa0d91898fff05f26ef43e2cce010aaee698911d9abe",
+      "size_bytes": 7766
     },
     {
       "path": "contracts/schemas/analysis.schema.json",
@@ -72,8 +72,8 @@
     },
     {
       "path": "contracts/schemas/manifests.schema.json",
-      "sha256": "fa8b88b77caa85ccdd01a3718ca8db9a0a8a5e3c01f88c1f38f4075b6fc45f18",
-      "size_bytes": 2484
+      "sha256": "0583184825063829d826bd72311d25c1ef06f18134d7f4e111f44298f71a8dc5",
+      "size_bytes": 2829
     },
     {
       "path": "contracts/schemas/runtime.schema.json",
@@ -82,8 +82,8 @@
     },
     {
       "path": "inputs/CORPUS-AND-ENVIRONMENT.md",
-      "sha256": "647b3b3e64d8d89a9da62da13b6d7e104059a4b4fcacd843767d7e1523cf25fd",
-      "size_bytes": 3154
+      "sha256": "f86cc80d27e733989633cab0219a2398fa8fb6840610178ae4802d097be51461",
+      "size_bytes": 3637
     },
     {
       "path": "inputs/corpus-files.txt",
@@ -97,8 +97,8 @@
     },
     {
       "path": "inputs/environment-observation.json",
-      "sha256": "8f8766b934a03f07a3c06e3423d230b8423deecf041f18bbc32f0b230a275f1f",
-      "size_bytes": 720
+      "sha256": "cd7f4eb5d666f7ce30b9a9461504cdda9fd534f065d11c0b687121c7ec77835f",
+      "size_bytes": 1134
     },
     {
       "path": "inputs/ground-truth.json",
@@ -127,8 +127,8 @@
     },
     {
       "path": "validate_specs.py",
-      "sha256": "eede7daa0914236e4b34fb1ec844fac444efa62408aa83a2a27ec3493be0acfe",
-      "size_bytes": 6514
+      "sha256": "937283a6184cf9b09479b50b866e962bb3656cde2439f9b7c68fe73f6deb23fa",
+      "size_bytes": 6681
     }
   ],
   "contract_version": "1.0.0",
@@ -136,44 +136,44 @@
   "execution_bundles": [
     {
       "path": "bundles/POC-0-execution-bundle-v1.0.0.zip",
-      "sha256": "e1698c356f160a91937c520c3c2baed6dd457758b4d89b234e4e590a7c0bf1a4",
-      "size_bytes": 81824,
+      "sha256": "71f89c663160fd44be409552e97978fb9a14fc688392e3b80cb0eb7d349c83a3",
+      "size_bytes": 85393,
       "spec_id": "POC-0"
     },
     {
       "path": "bundles/POC-1-execution-bundle-v1.0.0.zip",
-      "sha256": "00b65e760cfb2be56f53b989d82242f60e12e5af5e17b62dde3a1069f9a895c0",
-      "size_bytes": 81554,
+      "sha256": "71bedf363c1a83fd9d6fbc95cd9738e5c7e9eb4dfba8dc6ea376cb73ac628ed8",
+      "size_bytes": 85128,
       "spec_id": "POC-1"
     },
     {
       "path": "bundles/POC-2-execution-bundle-v1.0.0.zip",
-      "sha256": "8884e27bae29fe2378a9fa216b9a90aa3f0c45982caa9b884a01b50cdbd5a057",
-      "size_bytes": 81573,
+      "sha256": "1e004f2bcc4b4dfae65ae5574be05b0fdcb95e1740e0a5822f2148d263d7028b",
+      "size_bytes": 85139,
       "spec_id": "POC-2"
     },
     {
       "path": "bundles/POC-3-execution-bundle-v1.0.0.zip",
-      "sha256": "24330db405c65794e09dfe524c46f81e9f7efef66274e7ce2dbc81347e5b2a09",
-      "size_bytes": 81599,
+      "sha256": "68ebeeab2c708c2c1b4208a185b36afb2ee61d79eb1fe8058ab462fe4ea72ef9",
+      "size_bytes": 85462,
       "spec_id": "POC-3"
     },
     {
       "path": "bundles/POC-4-execution-bundle-v1.0.0.zip",
-      "sha256": "47f841ac0c86a62bb39aed5fbeb7ccfe2c8358de2b1e7ea0e6f6d3c6291a4ce4",
-      "size_bytes": 81538,
+      "sha256": "55e64d4318cb612b4caa63cb8a3cb9a8e12153b4f0f7076fe6d22fc3bd98cc35",
+      "size_bytes": 85106,
       "spec_id": "POC-4"
     },
     {
       "path": "bundles/POC-5-execution-bundle-v1.0.0.zip",
-      "sha256": "2c2154090630cafd496c46e15667c2e2a722e49d78407203a9ac2ea1b8228adf",
-      "size_bytes": 81481,
+      "sha256": "bddfefeab009fcb66a491a0292e52c840e906aea85b142cb00424471c9e33cc9",
+      "size_bytes": 85164,
       "spec_id": "POC-5"
     },
     {
       "path": "bundles/CONTINUUM-execution-bundle-v1.0.0.zip",
-      "sha256": "2b8757b38790aca8c699b1e57c411964bdec408460b484dc620f72776d195812",
-      "size_bytes": 82068,
+      "sha256": "1758c4de5bf4eacb5488ea683c80638ef4c68dda5972d5c54dcdd5064831f9b5",
+      "size_bytes": 85657,
       "spec_id": "CONTINUUM"
     }
   ],

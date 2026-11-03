@@ -60,7 +60,7 @@ Produce JSON and Markdown comparison from measurements, not model prose. Separat
 |---|---|
 | confirmed facts lost | pre-crash committed facts absent after recovery |
 | duplicate work | logical operations executed more than once without stated reason |
-| model calls | actual local Ollama requests |
+| model calls | actual selected local-provider requests (Ollama or LM Studio) |
 | recovery time | restart invocation to first safely resumed operation |
 | change detection | changed locked files detected / changed locked files |
 | selective reuse | unaffected committed operations reused / unaffected committed operations |

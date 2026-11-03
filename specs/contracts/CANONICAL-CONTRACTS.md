@@ -14,7 +14,7 @@ src/main/java/io/handoff/
   snapshot/            # immutable source snapshots
   index/               # JavaParser and CodeGraph
   evidence/            # evidence validation and redaction
-  analysis/            # Ollama calls, claims, revisions
+  `analysis/`        # OpenAI-compatible local LLM calls, claims, revisions
   review/              # human review decisions
   report/              # deterministic Markdown/JSON rendering
   persistence/         # SQLite adapters and migrations
@@ -46,11 +46,15 @@ Maven coordinates: `io.handoff:automatic-continuation-poc:1.0.0-SNAPSHOT`.
 | Maven Compiler Plugin | 3.14.1 |
 | Maven Surefire Plugin | 3.6.1 |
 | Maven Shade Plugin | 3.6.1 |
-| Ollama | 0.40.14 |
-| Model A | `qwen3:8b` |
-| Model B | `qwen3:14b` |
+| Local LLM transport | OpenAI-compatible HTTP (`/v1/chat/completions`) |
+| Supported provider | Ollama 0.40.14 or LM Studio 0.3.x+ |
+| Default endpoint | `http://127.0.0.1:11434` for Ollama; `http://127.0.0.1:1234/v1` for LM Studio |
+| Model A | `qwen3:8b` (Ollama tag) or the exact loaded LM Studio model identifier |
+| Model B | `qwen3:14b` (Ollama tag) or the exact loaded LM Studio model identifier |
 
-Dependencies MUST be resolved during provisioning. POC execution MUST use Maven offline mode (`mvn -o`). Model digests returned by `ollama show --modelfile`/local inventory MUST be captured in `environment-manifest.json`; a tag without a local digest fails preflight.
+The provider, endpoint, model identifier, and API mode MUST be persisted in every model invocation. `model_digest` MAY be persisted when the local provider exposes a content digest. When unavailable, the invocation MUST set `model_pin_status` to `UNPINNED_MODEL`; missing digest MUST NOT block local analysis, but reports MUST disclose the unpinned status. LM Studio MUST use its local OpenAI-compatible server; no cloud endpoint is permitted. A provider adapter MUST expose the same analysis interface and structured-output validation regardless of provider. The provider may be selected at preflight or by `--provider`; switching provider creates a new invocation/revision and MUST NOT overwrite prior results.
+
+Dependencies MUST be resolved during provisioning. POC execution MUST use Maven offline mode (`mvn -o`). A model identifier MUST be captured in `environment-manifest.json`; Ollama or LM Studio content digests SHOULD be captured when available. Missing digest is recorded as `UNPINNED_MODEL`, not a preflight failure.
 
 ## 3. Identifier and time contract
 
@@ -98,6 +102,7 @@ Executable name: `handoff`. Every command supports `--db <path>` and `--json`. H
 
 | Command | Required behavior |
 |---|---|
+| `run <task-id> [--provider ollama|lm-studio] [--endpoint <loopback-url>] [--model <id>]` | Execute pending work sequentially using the selected local provider |
 | `create-task <project> --corpus-manifest <file>` | Create task and immutable source snapshot |
 | `index <task-id>` | Parse snapshot and persist symbols/relations |
 | `run <task-id> [--model <tag>]` | Execute pending work sequentially |
@@ -113,7 +118,7 @@ Executable name: `handoff`. Every command supports `--db <path>` and `--json`. H
 | `review reject <review-id> --operator <id> --reason <text>` | Commit rejection |
 | `review supersede <review-id> <result-id> --operator <id> --reason <text>` | Select replacement revision |
 
-Failure names: `PROCESS_KILL_AFTER_RESULT`, `PROCESS_KILL_BEFORE_COMMIT`, `OLLAMA_UNAVAILABLE`, `CHECKPOINT_CORRUPT`, `SOURCE_CHANGED`, `MODEL_SWITCH`.
+Failure names: `PROCESS_KILL_AFTER_RESULT`, `PROCESS_KILL_BEFORE_COMMIT`, `LLM_UNAVAILABLE`, `CHECKPOINT_CORRUPT`, `SOURCE_CHANGED`, `MODEL_SWITCH`, `PROVIDER_SWITCH`.
 
 Exit codes:
 

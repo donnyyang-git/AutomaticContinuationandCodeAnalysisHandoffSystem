@@ -117,8 +117,12 @@ CREATE TABLE analysis_result_evidence (
 CREATE TABLE model_invocation (
   invocation_id TEXT PRIMARY KEY,
   operation_id TEXT NOT NULL REFERENCES work_item(operation_id),
+  provider TEXT NOT NULL CHECK(provider IN ('ollama','lm-studio')),
+  endpoint TEXT NOT NULL,
+  api_mode TEXT NOT NULL CHECK(api_mode = 'openai-compatible'),
   model_tag TEXT NOT NULL,
-  model_digest TEXT NOT NULL,
+  model_digest TEXT,
+  model_pin_status TEXT NOT NULL CHECK(model_pin_status IN ('PINNED','UNPINNED_MODEL')),
   prompt_version TEXT NOT NULL,
   input_sha256 TEXT NOT NULL,
   evidence_query_sha256 TEXT NOT NULL,
