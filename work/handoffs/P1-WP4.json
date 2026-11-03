@@ -28,13 +28,18 @@
       "exit_code": 0,
       "observed_at": "2026-11-04T00:00:00.000Z",
       "result": "Shaded package completed successfully."
+    },
+    {
+      "command": "P1Wp4Acceptance against work/handoffs/P1-WP4/automatic-continuation-poc.jar",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "Child JVM exited 137 at item three; fresh JVM resume completed all five items with five committed operations, five results, five checkpoints, valid cursor, and no duplicate operations."
     }
   ],
-  "unresolved_blockers": [
-    "The repository's P1-WP4 subprocess acceptance scenario was not separately exercised in this session; the clean-revision test suite and shaded package passed."
-  ],
+  "unresolved_blockers": [],
   "next_preconditions": [
-    "Run P2-WP1 against this accepted repository revision."
+    "Accept P2-WP1 handoff.",
+    "Run P2-WP2 against this accepted repository revision."
   ],
   "completed_at": "2026-11-04T00:00:00.000Z"
 }
