@@ -61,6 +61,16 @@ CREATE TABLE code_symbol (
   UNIQUE(snapshot_id, kind, qualified_name, path, start_line)
 ) STRICT;
 
+CREATE TABLE unresolved_diagnostic (
+  diagnostic_id TEXT PRIMARY KEY,
+  snapshot_id TEXT NOT NULL REFERENCES source_snapshot(snapshot_id),
+  path TEXT NOT NULL,
+  line INTEGER CHECK(line > 0),
+  kind TEXT NOT NULL CHECK(kind IN ('PARSE','SYMBOL_SOLVER')),
+  message TEXT NOT NULL,
+  UNIQUE(snapshot_id, path, line, kind, message)
+) STRICT;
+
 CREATE TABLE code_relation (
   relation_id TEXT PRIMARY KEY,
   snapshot_id TEXT NOT NULL REFERENCES source_snapshot(snapshot_id),
@@ -208,3 +218,4 @@ CREATE INDEX idx_relation_target ON code_relation(snapshot_id, target_symbol_id)
 CREATE INDEX idx_evidence_snapshot_status ON evidence(snapshot_id, status);
 CREATE INDEX idx_result_task_status ON analysis_result(task_id, status);
 CREATE INDEX idx_event_task_sequence ON execution_event(task_id, sequence);
+CREATE INDEX idx_diagnostic_snapshot_path ON unresolved_diagnostic(snapshot_id, path, line);

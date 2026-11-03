@@ -1,4 +1,6 @@
 package io.handoff.cli;
+import io.handoff.index.JavaIndexer;
+import java.io.IOException;
 
 import io.handoff.persistence.ConnectionFactory;
 import io.handoff.persistence.SchemaBootstrapper;
@@ -35,7 +37,8 @@ import picocli.CommandLine.Model.CommandSpec;
                 HandoffCommand.RunCommand.class,
                 HandoffCommand.PauseCommand.class,
                 HandoffCommand.ResumeCommand.class,
-                HandoffCommand.InjectFailureCommand.class})
+                HandoffCommand.InjectFailureCommand.class,
+                HandoffCommand.IndexCommand.class})
 public final class HandoffCommand implements Runnable {
     static final int SUCCESS = 0;
     static final int PRECONDITION_ERROR = 10;
@@ -177,6 +180,33 @@ public final class HandoffCommand implements Runnable {
             } catch (IllegalArgumentException failure) {
                 return reportFailure(parent, new io.handoff.runtime.RuntimeException(
                         "E_PRECONDITION", "Unknown failure: " + failureName));
+            }
+        }
+    }
+
+    @Command(name = "index", description = "Parse manifest-listed Java files into the code index.")
+    static final class IndexCommand implements Callable<Integer> {
+        @ParentCommand HandoffCommand parent;
+        @Parameters(index = "0", description = "Existing snapshot ID.", paramLabel = "SNAPSHOT-ID") String snapshotId;
+        @Option(names = "--source-root", required = true, paramLabel = "PATH") Path sourceRoot;
+        @Option(names = "--manifest", required = true, paramLabel = "PATH") Path manifest;
+
+        @Override
+        public Integer call() throws Exception {
+            try (Connection connection = openDatabase(parent)) {
+                JavaIndexer.IndexResult result = new JavaIndexer().index(connection, snapshotId, sourceRoot, manifest);
+                PrintWriter out = parent.commandSpec.commandLine().getOut();
+                if (parent.json) {
+                    out.printf("{\"manifest_java_files\":%d,\"parsed_files\":%d,\"symbols\":%d,\"diagnostics\":%d}%n",
+                            result.manifestJavaFiles(), result.parsedFiles(), result.symbols(), result.diagnostics());
+                } else {
+                    out.printf("Indexed %d/%d Java files, %d symbols, %d diagnostics%n",
+                            result.parsedFiles(), result.manifestJavaFiles(), result.symbols(), result.diagnostics());
+                }
+                out.flush();
+                return SUCCESS;
+            } catch (SQLException | IOException failure) {
+                return reportFailure(parent, new io.handoff.runtime.RuntimeException("E_INDEX", failure.getMessage()));
             }
         }
     }

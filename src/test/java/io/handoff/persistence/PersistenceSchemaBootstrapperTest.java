@@ -22,6 +22,7 @@ class PersistenceSchemaBootstrapperTest {
             "task_state",
             "work_item",
             "code_symbol",
+            "unresolved_diagnostic",
             "code_relation",
             "evidence",
             "analysis_result",
