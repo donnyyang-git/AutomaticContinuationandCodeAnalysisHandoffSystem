@@ -1,0 +1,52 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-2",
+  "spec_version": "1.0.0",
+  "work_packet_id": "P2-WP2",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "repository_revision": "bc6e35b",
+  "changed_files": [
+    "src/main/java/io/handoff/cli/HandoffCommand.java",
+    "src/main/java/io/handoff/index/CodeGraph.java",
+    "src/main/java/io/handoff/index/JavaIndexer.java",
+    "src/main/java/io/handoff/index/RelationIndexer.java",
+    "src/main/java/io/handoff/index/RelationMetrics.java",
+    "src/test/java/io/handoff/index/RelationGraphTest.java"
+  ],
+  "artifacts": [
+    {
+      "path": "work/handoffs/P2-WP2/automatic-continuation-poc.jar",
+      "sha256": "74fe8bdcdde0b07ff1d661ff8a1847dc73979fbd3edb3d7ccff15f3e8ede630d"
+    }
+  ],
+  "verification": [
+    {
+      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q -Dtest=RelationGraphTest test",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "CONTAINS, EXTENDS, IMPLEMENTS, DIRECT_CALL, duplicate prevention, CodeGraph callers/callees/reverseDependents, and direct-call metrics passed."
+    },
+    {
+      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q test package",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "Full test suite and shaded package completed successfully."
+    },
+    {
+      "command": "java -jar target/automatic-continuation-poc.jar --help",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "CLI exposes index and query commands."
+    }
+  ],
+  "unresolved_blockers": [
+    "The fixed POC-2 corpus ground-truth comparison has not yet been run; the relation metrics engine was verified on an independent fixture."
+  ],
+  "next_preconditions": [
+    "Accept P2-WP2 handoff.",
+    "Run P2-WP3 against this accepted repository revision."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}
