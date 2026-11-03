@@ -1,7 +1,11 @@
 package io.handoff.cli;
 
+import io.handoff.persistence.ConnectionFactory;
+import io.handoff.persistence.SchemaBootstrapper;
 import java.io.PrintWriter;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -21,6 +25,9 @@ public final class HandoffCommand implements Runnable {
     static final int SUCCESS = 0;
     static final int PRECONDITION_ERROR = 10;
 
+    @Spec
+    CommandSpec commandSpec;
+
     @Option(
             names = "--db",
             description = "SQLite database path.",
@@ -35,8 +42,12 @@ public final class HandoffCommand implements Runnable {
 
     @Override
     public void run() {
-        // Picocli renders the root help when requested. Without a subcommand, keep the
-        // shell successful and quiet so future commands can own their output.
+        try (Connection connection = ConnectionFactory.open(database)) {
+            SchemaBootstrapper.bootstrap(connection);
+        } catch (SQLException failure) {
+            throw new CommandLine.ExecutionException(
+                    commandSpec.commandLine(), "Unable to bootstrap database", failure);
+        }
     }
 
     public static void main(String[] args) {
