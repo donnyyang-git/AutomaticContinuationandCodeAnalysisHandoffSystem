@@ -1,0 +1,63 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-0",
+  "spec_version": "1.0.0",
+  "work_packet_id": "P0-WP2",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "changed_files": [
+    "pom.xml",
+    "src/main/java/io/handoff/cli/HandoffCommand.java",
+    "src/main/java/io/handoff/persistence/ConnectionFactory.java",
+    "src/main/java/io/handoff/persistence/SchemaBootstrapper.java",
+    "src/main/resources/db/migration/schema.sql",
+    "src/test/java/io/handoff/persistence/PersistenceSchemaBootstrapperTest.java"
+  ],
+  "artifacts": [
+    {
+      "path": "work/handoffs/POC-0-WP2/automatic-continuation-poc.jar",
+      "sha256": "b3923371938721eb4be1dc6aa2afe667433338465ec33d7e09d2f8417b98d34b"
+    },
+    {
+      "path": "work/handoffs/POC-0-WP2/handoff-startup.db",
+      "sha256": "3fdb4b6aef97c2c5fa3849e74a3480fdf56939bd2b0999eb00dc6b18d258fd63"
+    }
+  ],
+  "verification": [
+    {
+      "command": "mvn -o -q -Dtest=*Persistence* test",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "stdout_sha256": "7d4f13fe6b4164b5313078029f88f896161b13fa042efd21907dfcc906d69678",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "mvn -o -q test",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "stdout_sha256": "7d4f13fe6b4164b5313078029f88f896161b13fa042efd21907dfcc906d69678",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "mvn -o -q -DskipTests package",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "java -jar target/automatic-continuation-poc.jar --db work/p0-wp2/handoff-startup.db",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "db7e15860f9a9f9be2f0c666fd8e98f6acb3e794233483fc96959ab23c479ea3"
+    }
+  ],
+  "unresolved_blockers": [],
+  "next_preconditions": [
+    "Accept this schema-valid handoff.",
+    "Run P0-WP3 against accepted repository revision 0e07e9b."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}
