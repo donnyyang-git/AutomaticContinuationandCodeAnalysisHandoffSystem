@@ -135,8 +135,11 @@ public final class HandoffCommand implements Runnable {
         @Override
         public Integer call() throws Exception {
             try (Connection connection = openDatabase(parent)) {
+                new io.handoff.runtime.IntegrityValidator(connection).validate(taskId);
                 new io.handoff.runtime.TaskRuntime(connection).run(taskId, item -> { });
                 return SUCCESS;
+            } catch (io.handoff.runtime.IntegrityFailure failure) {
+                return reportIntegrityFailure(parent, failure);
             } catch (io.handoff.runtime.RuntimeException failure) {
                 return reportFailure(parent, failure);
             }
@@ -148,6 +151,18 @@ public final class HandoffCommand implements Runnable {
         SchemaBootstrapper.bootstrap(connection);
         return connection;
     }
+
+    private static int reportIntegrityFailure(HandoffCommand parent, io.handoff.runtime.IntegrityFailure failure) {
+        if (parent.json) {
+            parent.commandSpec.commandLine().getOut().printf(
+                    "{\"error\":{\"code\":\"E_INTEGRITY\",\"message\":\"%s\"}}%n",
+                    failure.getMessage().replace("\\", "\\\\").replace("\"", "\\\""));
+        } else {
+            parent.commandSpec.commandLine().getOut().println(failure.getMessage());
+        }
+        return 30;
+    }
+
 
     private static int reportFailure(HandoffCommand parent, io.handoff.runtime.RuntimeException failure) {
         if (parent.json) {
