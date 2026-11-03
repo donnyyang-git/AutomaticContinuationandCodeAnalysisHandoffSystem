@@ -1,0 +1,75 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-2",
+  "spec_version": "1.0.0",
+  "work_packet_id": "P2-WP3",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "repository_revision": "1b27b84",
+  "changed_files": [
+    "src/main/java/io/handoff/cli/HandoffCommand.java",
+    "src/main/java/io/handoff/index/ConfigurationIndexer.java",
+    "src/test/java/io/handoff/index/ConfigurationIndexerTest.java",
+    "work/handoffs/P2-WP3/configuration-comparison.txt"
+  ],
+  "artifacts": [
+    {
+      "path": "work/handoffs/P2-WP3/automatic-continuation-poc.jar",
+      "sha256": "8e8ba293f7ee2873104f38336ef30f311fe744dc9599a12a8e43850043c58a70"
+    },
+    {
+      "path": "work/handoffs/P2-WP3/configuration-comparison.txt",
+      "sha256": "55fb178a8c28a82b15fe7ee11e3e20d9931370a16ab9ed54802edb7b242e9408"
+    }
+  ],
+  "acceptance": {
+    "decision": "accepted",
+    "xml": {
+      "parsed_configuration_files": 9,
+      "spring_xml_files_parsed": 2,
+      "mapper_statements": 25,
+      "xml_maps_expected": 25,
+      "xml_maps_observed": 25,
+      "authority": "CONFIG"
+    },
+    "views": {
+      "locked_expected": 5,
+      "locked_observed": 5,
+      "additional_valid_selected_view_entries": 2,
+      "total_view_entries": 7,
+      "authority": "CONFIG"
+    },
+    "conflict_policy": "Ambiguous mapper statement matches throw E_PARSER_CONFLICT, persist no relation, and mark a supplied task REQUIRES_REVIEW.",
+    "unresolved_policy": "Dynamic redirects, framework routes, and literal views without selected JSP files persist as UNRESOLVED with UNKNOWN authority; no target is guessed.",
+    "diagnostics": 0
+  },
+  "verification": [
+    {
+      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q -Dtest=ConfigurationIndexerTest test",
+      "exit_code": 0,
+      "result": "XML mapper links, Spring XML parsing, literal/constant JSP view entries, unresolved routes, conflict rejection, and idempotency passed."
+    },
+    {
+      "command": "fixed P2-WP3 corpus smoke runner",
+      "exit_code": 0,
+      "result": "25 Java files, 25 XML_MAPS, 7 VIEW_ENTRY (5 locked plus 2 additional valid selected views), 24 UNRESOLVED, 0 diagnostics."
+    },
+    {
+      "command": "java -jar target/automatic-continuation-poc.jar --db target/p2wp3-corpus.db --json config-index p2-corpus-v1.0.0 --source-root target/p2-corpus --manifest specs/inputs/corpus-manifest.json",
+      "exit_code": 0,
+      "result": "CLI returned parsed_files=9, xml_statements=25, xml_links=0, view_links=0, unresolved=0, diagnostics=0 on the idempotent second run."
+    },
+    {
+      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q verify",
+      "exit_code": 0,
+      "result": "Full offline Maven verification passed; existing integrity test emitted its expected E_INTEGRITY fixture output."
+    }
+  ],
+  "unresolved_blockers": [],
+  "next_preconditions": [
+    "P2-WP4 recovery and determinism is the next POC-2 work packet.",
+    "Do not advance to POC-3 until P2-WP4 acceptance and POC-2-final handoff are complete."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}
