@@ -6,47 +6,75 @@
   "contract_version": "1.0.0",
   "corpus_version": "1.0.0",
   "environment_version": "1.0.0",
-  "repository_revision": "bc6e35b",
+  "repository_revision": "33bb08e",
   "changed_files": [
     "src/main/java/io/handoff/cli/HandoffCommand.java",
     "src/main/java/io/handoff/index/CodeGraph.java",
     "src/main/java/io/handoff/index/JavaIndexer.java",
     "src/main/java/io/handoff/index/RelationIndexer.java",
     "src/main/java/io/handoff/index/RelationMetrics.java",
-    "src/test/java/io/handoff/index/RelationGraphTest.java"
+    "src/test/java/io/handoff/index/JavaIndexerTest.java",
+    "src/test/java/io/handoff/index/RelationGraphTest.java",
+    "work/handoffs/P2-WP2/corpus-comparison.txt"
   ],
   "artifacts": [
     {
       "path": "work/handoffs/P2-WP2/automatic-continuation-poc.jar",
-      "sha256": "74fe8bdcdde0b07ff1d661ff8a1847dc73979fbd3edb3d7ccff15f3e8ede630d"
+      "sha256": "8f4c534d9cbdf0baab6e46221d819b0581a28b6199b7a5b95b7a92350fbd4002"
+    },
+    {
+      "path": "work/handoffs/P2-WP2/corpus-comparison.txt",
+      "sha256": "691589cbbac8c71c4d79fdf2e7d215780f4c57a65aa8343223d469c5bd477c6b"
     }
   ],
+  "acceptance": {
+    "decision": "accepted_with_documented_unresolved_calls",
+    "declaration_gate": {
+      "parsed_files": 25,
+      "types_expected": 25,
+      "types_observed": 25,
+      "methods_expected": 238,
+      "methods_observed": 238
+    },
+    "direct_call_gate": {
+      "expected": 296,
+      "observed": 236,
+      "true_positive": 236,
+      "false_positive": 0,
+      "false_negative": 60,
+      "precision": 1.0,
+      "recall": 0.7972972972972973,
+      "mismatch_evidence": "work/handoffs/P2-WP2/corpus-comparison.txt"
+    },
+    "invariant": "No false resolved direct-call edges were produced; all 60 missing records include expected/observed comparison evidence."
+  },
   "verification": [
     {
-      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q -Dtest=RelationGraphTest test",
+      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q -Dtest=RelationGraphTest,JavaIndexerTest test",
       "exit_code": 0,
       "observed_at": "2026-11-04T00:00:00.000Z",
-      "result": "CONTAINS, EXTENDS, IMPLEMENTS, DIRECT_CALL, duplicate prevention, CodeGraph callers/callees/reverseDependents, and direct-call metrics passed."
+      "result": "Relation graph, top-level declaration filtering, direct-call evidence lines, and Java indexer regression tests passed."
+    },
+    {
+      "command": "fixed POC-2 corpus comparison runner",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "25 files parsed; 25/25 types; 238/238 methods; direct calls precision 1.0 and recall 0.7972972972972973; 60 mismatch records emitted with evidence."
     },
     {
       "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q test package",
       "exit_code": 0,
       "observed_at": "2026-11-04T00:00:00.000Z",
       "result": "Full test suite and shaded package completed successfully."
-    },
-    {
-      "command": "java -jar target/automatic-continuation-poc.jar --help",
-      "exit_code": 0,
-      "observed_at": "2026-11-04T00:00:00.000Z",
-      "result": "CLI exposes index and query commands."
     }
   ],
   "unresolved_blockers": [
-    "The fixed POC-2 corpus ground-truth comparison has not yet been run; the relation metrics engine was verified on an independent fixture."
+    "60 ground-truth direct calls remain unresolved by the configured source-root/reflection symbol solver. They are preserved as mismatch evidence rather than fabricated resolved relations; 59 parser/symbol-solver diagnostics were observed.",
+    "The two standard-library chained calls CartItem.map and LineItem.map are included in the 60 missing records and require a future solver/configuration decision if recall must increase."
   ],
   "next_preconditions": [
-    "Accept P2-WP2 handoff.",
-    "Run P2-WP3 against this accepted repository revision."
+    "Do not begin P2-WP3 unless the documented acceptance decision is explicitly retained.",
+    "If P2-WP3 proceeds, preserve the zero-false-positive invariant and unresolved relation semantics."
   ],
   "completed_at": "2026-11-04T00:00:00.000Z"
 }
