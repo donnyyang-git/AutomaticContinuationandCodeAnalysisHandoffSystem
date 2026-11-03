@@ -1,2 +1,3 @@
 # Local corpus checkout and generated working files
 .spec-work/
+target/

@@ -20,7 +20,11 @@ import picocli.CommandLine.Model.CommandSpec;
         version = "1.0.0",
         mixinStandardHelpOptions = true,
         description = "Automatic continuation and code analysis handoff CLI.",
-        subcommands = HandoffCommand.StatusCommand.class)
+        subcommands = {
+                HandoffCommand.StatusCommand.class,
+                HandoffCommand.RunCommand.class,
+                HandoffCommand.PauseCommand.class,
+                HandoffCommand.ResumeCommand.class})
 public final class HandoffCommand implements Runnable {
     static final int SUCCESS = 0;
     static final int PRECONDITION_ERROR = 10;
@@ -80,5 +84,79 @@ public final class HandoffCommand implements Runnable {
             out.flush();
             return PRECONDITION_ERROR;
         }
+    }
+
+    @Command(name = "run", description = "Run pending work sequentially.")
+    static final class RunCommand implements Callable<Integer> {
+        @ParentCommand HandoffCommand parent;
+        @Parameters(index = "0", description = "Task UUID.", paramLabel = "TASK-ID") String taskId;
+        @Option(names = "--pause-after", description = "Request pause after this many committed work items.", defaultValue = "-1")
+        int pauseAfter;
+
+        @Override
+        public Integer call() throws Exception {
+            try (Connection connection = openDatabase(parent)) {
+                io.handoff.runtime.TaskRuntime runtime = new io.handoff.runtime.TaskRuntime(connection);
+                var executed = new java.util.concurrent.atomic.AtomicInteger();
+                runtime.run(taskId, item -> {
+                    if (pauseAfter >= 0 && executed.incrementAndGet() == pauseAfter) {
+                        runtime.requestPause(taskId, runtime.task(taskId).version());
+                    }
+                });
+                return SUCCESS;
+            } catch (io.handoff.runtime.RuntimeException failure) {
+                return reportFailure(parent, failure);
+            }
+        }
+    }
+
+    @Command(name = "pause", description = "Request pause at the next transaction boundary.")
+    static final class PauseCommand implements Callable<Integer> {
+        @ParentCommand HandoffCommand parent;
+        @Parameters(index = "0", description = "Task UUID.", paramLabel = "TASK-ID") String taskId;
+
+        @Override
+        public Integer call() throws Exception {
+            try (Connection connection = openDatabase(parent)) {
+                io.handoff.runtime.TaskRuntime runtime = new io.handoff.runtime.TaskRuntime(connection);
+                runtime.requestPause(taskId, runtime.task(taskId).version());
+                return SUCCESS;
+            } catch (io.handoff.runtime.RuntimeException failure) {
+                return reportFailure(parent, failure);
+            }
+        }
+    }
+
+    @Command(name = "resume", description = "Resume pending work from the last boundary.")
+    static final class ResumeCommand implements Callable<Integer> {
+        @ParentCommand HandoffCommand parent;
+        @Parameters(index = "0", description = "Task UUID.", paramLabel = "TASK-ID") String taskId;
+
+        @Override
+        public Integer call() throws Exception {
+            try (Connection connection = openDatabase(parent)) {
+                new io.handoff.runtime.TaskRuntime(connection).run(taskId, item -> { });
+                return SUCCESS;
+            } catch (io.handoff.runtime.RuntimeException failure) {
+                return reportFailure(parent, failure);
+            }
+        }
+    }
+
+    private static Connection openDatabase(HandoffCommand parent) throws SQLException {
+        Connection connection = ConnectionFactory.open(parent.database);
+        SchemaBootstrapper.bootstrap(connection);
+        return connection;
+    }
+
+    private static int reportFailure(HandoffCommand parent, io.handoff.runtime.RuntimeException failure) {
+        if (parent.json) {
+            parent.commandSpec.commandLine().getOut().printf(
+                    "{\"error\":{\"code\":\"%s\",\"message\":\"%s\"}}%n",
+                    failure.code(), failure.getMessage().replace("\\", "\\\\").replace("\"", "\\\""));
+        } else {
+            parent.commandSpec.commandLine().getOut().println(failure.getMessage());
+        }
+        return PRECONDITION_ERROR;
     }
 }
