@@ -1,4 +1,5 @@
 package io.handoff.cli;
+import io.handoff.index.ConfigurationIndexer;
 import io.handoff.index.JavaIndexer;
 import io.handoff.index.CodeGraph;
 import java.io.IOException;
@@ -39,7 +40,7 @@ import picocli.CommandLine.Model.CommandSpec;
                 HandoffCommand.PauseCommand.class,
                 HandoffCommand.ResumeCommand.class,
                 HandoffCommand.InjectFailureCommand.class,
-                HandoffCommand.IndexCommand.class,
+                HandoffCommand.ConfigurationIndexCommand.class,
                 HandoffCommand.QueryCommand.class})
 public final class HandoffCommand implements Runnable {
     static final int SUCCESS = 0;
@@ -209,6 +210,39 @@ public final class HandoffCommand implements Runnable {
                 return SUCCESS;
             } catch (SQLException | IOException failure) {
                 return reportFailure(parent, new io.handoff.runtime.RuntimeException("E_INDEX", failure.getMessage()));
+            }
+        }
+    }
+
+    @Command(name = "config-index", description = "Parse manifest-listed XML and JSP configuration files.")
+    static final class ConfigurationIndexCommand implements Callable<Integer> {
+        @ParentCommand HandoffCommand parent;
+        @Parameters(index = "0", description = "Existing snapshot ID.", paramLabel = "SNAPSHOT-ID") String snapshotId;
+        @Option(names = "--source-root", required = true, paramLabel = "PATH") Path sourceRoot;
+        @Option(names = "--manifest", required = true, paramLabel = "PATH") Path manifest;
+        @Option(names = "--task", description = "Task UUID to mark REQUIRES_REVIEW on parser/config conflict.") String taskId;
+
+        @Override
+        public Integer call() throws Exception {
+            try (Connection connection = openDatabase(parent)) {
+                ConfigurationIndexer.IndexResult result = new ConfigurationIndexer().index(
+                        connection, snapshotId, sourceRoot, manifest, taskId);
+                PrintWriter out = parent.commandSpec.commandLine().getOut();
+                if (parent.json) {
+                    out.printf("{\"parsed_files\":%d,\"xml_statements\":%d,\"xml_links\":%d,\"view_links\":%d,\"unresolved\":%d,\"diagnostics\":%d}%n",
+                            result.parsedFiles(), result.xmlStatements(), result.xmlLinks(), result.viewLinks(),
+                            result.unresolved(), result.diagnostics());
+                } else {
+                    out.printf("Indexed %d configuration files, %d XML statements, %d XML links, %d view links, %d unresolved, %d diagnostics%n",
+                            result.parsedFiles(), result.xmlStatements(), result.xmlLinks(), result.viewLinks(),
+                            result.unresolved(), result.diagnostics());
+                }
+                out.flush();
+                return SUCCESS;
+            } catch (ConfigurationIndexer.ConflictException failure) {
+                return reportFailure(parent, new io.handoff.runtime.RuntimeException("E_PARSER_CONFLICT", failure.getMessage()));
+            } catch (SQLException | IOException failure) {
+                return reportFailure(parent, new io.handoff.runtime.RuntimeException("E_CONFIG_INDEX", failure.getMessage()));
             }
         }
     }
