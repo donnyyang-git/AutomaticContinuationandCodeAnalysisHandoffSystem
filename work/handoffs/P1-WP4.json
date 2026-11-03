@@ -1,0 +1,40 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-1",
+  "spec_version": "1.0.0",
+  "work_packet_id": "P1-WP4",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "repository_revision": "773c6bbcf2d334891c93650d93e9c10fd3a8af04",
+  "changed_files": [
+    "src/main/java/io/handoff/cli/HandoffCommand.java"
+  ],
+  "artifacts": [
+    {
+      "path": "work/handoffs/P1-WP4/automatic-continuation-poc.jar",
+      "sha256": "9e242fb1dc62526b95f5aaa96aeff93c7923aa32e1036d46521482a63ce28a59"
+    }
+  ],
+  "verification": [
+    {
+      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q -Dtest=*Test test",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "All tests passed."
+    },
+    {
+      "command": "mvn -Dmaven.repo.local=C:\\softwares\\m2-repository -o -q -DskipTests package",
+      "exit_code": 0,
+      "observed_at": "2026-11-04T00:00:00.000Z",
+      "result": "Shaded package completed successfully."
+    }
+  ],
+  "unresolved_blockers": [
+    "The repository's P1-WP4 subprocess acceptance scenario was not separately exercised in this session; the clean-revision test suite and shaded package passed."
+  ],
+  "next_preconditions": [
+    "Run P2-WP1 against this accepted repository revision."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}
