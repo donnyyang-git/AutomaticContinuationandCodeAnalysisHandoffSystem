@@ -38,7 +38,7 @@ public final class TaskRuntime {
     public void addWorkItem(String operationId, String taskId, String kind, String subject, String inputSha256)
             throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO work_item(operation_id,task_id,kind,subject,status,input_sha256) VALUES(?,?,?,?,'PENDING',?)")) {
+                "INSERT OR IGNORE INTO work_item(operation_id,task_id,kind,subject,status,input_sha256) VALUES(?,?,?,?,'PENDING',?)")) {
             statement.setString(1, operationId);
             statement.setString(2, taskId);
             statement.setString(3, kind);
@@ -66,7 +66,7 @@ public final class TaskRuntime {
         List<WorkItem> items = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT operation_id,task_id,kind,subject,status,attempt_count,input_sha256 "
-                        + "FROM work_item WHERE task_id=? ORDER BY kind,subject,operation_id")) {
+                        + "FROM work_item WHERE task_id=? ORDER BY CASE kind WHEN 'JAVA_CLASS' THEN 0 WHEN 'CONFIG_FILE' THEN 1 ELSE 2 END,subject,operation_id")) {
             statement.setString(1, taskId);
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
@@ -120,7 +120,11 @@ public final class TaskRuntime {
     }
 
     public void run(String taskId, WorkExecutor executor) throws Exception {
+        recoverRunningWork(taskId);
         TaskInfo current = task(taskId);
+        if (current.state() == TaskState.COMPLETED) {
+            return;
+        }
         if (current.state() == TaskState.PAUSED || current.state() == TaskState.INTERRUPTED
                 || current.state() == TaskState.REQUIRES_REVIEW) {
             transition(taskId, TaskState.RESUMING, current.version());
@@ -166,6 +170,16 @@ public final class TaskRuntime {
             transition(taskId, TaskState.COMPLETED, task(taskId).version());
         }
     }
+
+    /** Converts work left RUNNING by a terminated process back to retryable work. */
+    public int recoverRunningWork(String taskId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE work_item SET status='PENDING' WHERE task_id=? AND status='RUNNING'")) {
+            statement.setString(1, taskId);
+            return statement.executeUpdate();
+        }
+    }
+
 
     private void pauseAtBoundary(String taskId, TaskInfo current) throws SQLException, RuntimeException {
         connection.setAutoCommit(false);

@@ -41,6 +41,8 @@ import picocli.CommandLine.Model.CommandSpec;
                 HandoffCommand.ResumeCommand.class,
                 HandoffCommand.InjectFailureCommand.class,
                 HandoffCommand.ConfigurationIndexCommand.class,
+                HandoffCommand.RuntimeIndexCommand.class,
+                HandoffCommand.ExportCommand.class,
                 HandoffCommand.QueryCommand.class})
 public final class HandoffCommand implements Runnable {
     static final int SUCCESS = 0;
@@ -247,6 +249,44 @@ public final class HandoffCommand implements Runnable {
         }
     }
 
+
+    @Command(name = "runtime-index", description = "Schedule and run one durable operation per top-level Java class/configuration file.")
+    static final class RuntimeIndexCommand implements Callable<Integer> {
+        @ParentCommand HandoffCommand parent;
+        @Parameters(index = "0") String taskId;
+        @Parameters(index = "1") String snapshotId;
+        @Option(names = "--source-root", required = true) Path sourceRoot;
+        @Option(names = "--manifest", required = true) Path manifest;
+
+        @Override
+        public Integer call() throws Exception {
+            try (Connection connection = openDatabase(parent)) {
+                new io.handoff.index.RuntimeIndexingService().run(connection, taskId, snapshotId, sourceRoot, manifest);
+                return SUCCESS;
+            } catch (ConfigurationIndexer.ConflictException failure) {
+                return reportFailure(parent, new io.handoff.runtime.RuntimeException("E_PARSER_CONFLICT", failure.getMessage()));
+            } catch (SQLException | IOException failure) {
+                return reportFailure(parent, new io.handoff.runtime.RuntimeException("E_RUNTIME_INDEX", failure.getMessage()));
+            }
+        }
+    }
+
+    @Command(name = "export", description = "Write the normalized symbol/relation export.")
+    static final class ExportCommand implements Callable<Integer> {
+        @ParentCommand HandoffCommand parent;
+        @Parameters(index = "0") String snapshotId;
+        @Option(names = "--output", required = true) Path output;
+
+        @Override
+        public Integer call() throws Exception {
+            try (Connection connection = openDatabase(parent)) {
+                io.handoff.index.NormalizedGraphExport.write(connection, snapshotId, output);
+                return SUCCESS;
+            } catch (SQLException | IOException failure) {
+                return reportFailure(parent, new io.handoff.runtime.RuntimeException("E_EXPORT", failure.getMessage()));
+            }
+        }
+    }
 
     @Command(name = "query", description = "Query code graph callers, callees, or reverse dependents.")
     static final class QueryCommand implements Callable<Integer> {
