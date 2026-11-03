@@ -1,0 +1,84 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-2",
+  "spec_version": "1.0.0",
+  "work_packet_id": "POC-2-final",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "repository_revision": "aed2a68",
+  "changed_files": [
+    "pom.xml",
+    "src/main/java/io/handoff/cli/HandoffCommand.java",
+    "src/main/java/io/handoff/runtime/TaskRuntime.java",
+    "src/main/java/io/handoff/index/NormalizedGraphExport.java",
+    "src/main/java/io/handoff/index/RuntimeIndexingService.java",
+    "work/handoffs/P2-WP4.json"
+  ],
+  "artifacts": [
+    {"path": "work/handoffs/P2-WP4/automatic-continuation-poc.jar", "sha256": "5e629b24ce14337dc411b3b7f6cb747f2c2c54e8e5d068d279683c08b04099b2"},
+    {"path": "work/handoffs/P2-WP4/normalized-export-a.txt", "sha256": "6bec2c1e42384d452ccad63050701caa8f083499e60921af0c90459b2f94bc6d"},
+    {"path": "work/handoffs/P2-WP4/normalized-export-b.txt", "sha256": "6bec2c1e42384d452ccad63050701caa8f083499e60921af0c90459b2f94bc6d"},
+    {"path": "work/handoffs/P2-WP4/normalized-export-resume.txt", "sha256": "6bec2c1e42384d452ccad63050701caa8f083499e60921af0c90459b2f94bc6d"},
+    {"path": "work/handoffs/P2-WP4.json", "sha256": "bcd7ac5608b3b4655e44160798a7a712bfc5d5b85305756fd7ad348768ad1ca4"}
+  ],
+  "acceptance": {
+    "decision": "accepted",
+    "declaration_gate": {
+      "types_expected": 25,
+      "types_observed": 25,
+      "methods_expected": 238,
+      "methods_observed": 238,
+      "source_declaration_authority": "PARSER"
+    },
+    "configuration_gate": {
+      "xml_maps_expected": 25,
+      "xml_maps_observed": 25,
+      "locked_view_links_expected": 5,
+      "locked_view_links_observed": 5,
+      "authority": "CONFIG"
+    },
+    "direct_call_gate": {
+      "expected": 296,
+      "true_positive": 236,
+      "false_positive": 0,
+      "false_negative": 60,
+      "precision": 1.0,
+      "recall": 0.7972972972972973,
+      "mismatch_evidence": "work/handoffs/P2-WP2/corpus-comparison.txt"
+    },
+    "recovery_and_determinism": {
+      "java_operations": 25,
+      "configuration_operations": 16,
+      "clean_database_exports_byte_equal": true,
+      "kill_resume_completed": true,
+      "committed_operation_repeats": 0,
+      "committed_operation_reparse_observed": 0
+    },
+    "cli_smoke": "runtime-index and export completed successfully"
+  },
+  "verification": [
+    {
+      "command": "powershell -NoProfile -Command '. .\\setup-poc-env.ps1; mvn -o -q verify'",
+      "exit_code": 0,
+      "result": "Full offline Maven verification passed."
+    },
+    {
+      "command": "P2-WP4 clean database A/B and normalized export comparison",
+      "exit_code": 0,
+      "result": "Both runs produced 386 symbols and 674 relations; normalized exports were byte-identical."
+    },
+    {
+      "command": "P2-WP4 kill/resume and committed-operation repeat check",
+      "exit_code": 0,
+      "result": "Mid-index termination followed by resume reached COMPLETED with 41/41 committed operations and zero committed repeats."
+    }
+  ],
+  "unresolved_blockers": [
+    "60 ground-truth direct calls remain unresolved by the configured source-root/reflection symbol solver; the inherited P2-WP2 acceptance preserves them as explicit mismatch evidence with zero false-positive resolved edges."
+  ],
+  "next_preconditions": [
+    "POC-3 may start from this final POC-2 handoff."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}

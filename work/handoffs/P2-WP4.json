@@ -1,0 +1,69 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-2",
+  "spec_version": "1.0.0",
+  "work_packet_id": "P2-WP4",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "repository_revision": "aed2a68",
+  "changed_files": [
+    "pom.xml",
+    "src/main/java/io/handoff/cli/HandoffCommand.java",
+    "src/main/java/io/handoff/runtime/TaskRuntime.java",
+    "src/main/java/io/handoff/index/NormalizedGraphExport.java",
+    "src/main/java/io/handoff/index/RuntimeIndexingService.java"
+  ],
+  "artifacts": [
+    {"path": "work/handoffs/P2-WP4/automatic-continuation-poc.jar", "sha256": "5e629b24ce14337dc411b3b7f6cb747f2c2c54e8e5d068d279683c08b04099b2"},
+    {"path": "work/handoffs/P2-WP4/normalized-export-a.txt", "sha256": "6bec2c1e42384d452ccad63050701caa8f083499e60921af0c90459b2f94bc6d"},
+    {"path": "work/handoffs/P2-WP4/normalized-export-b.txt", "sha256": "6bec2c1e42384d452ccad63050701caa8f083499e60921af0c90459b2f94bc6d"},
+    {"path": "work/handoffs/P2-WP4/normalized-export-resume.txt", "sha256": "6bec2c1e42384d452ccad63050701caa8f083499e60921af0c90459b2f94bc6d"}
+  ],
+  "acceptance": {
+    "decision": "accepted",
+    "operation_granularity": {
+      "java_operations": 25,
+      "configuration_operations": 16,
+      "java_subject": "manifest-relative-path#top-level-qualified-name",
+      "invariant": "one top-level Java type or one configuration file per operation"
+    },
+    "clean_database_determinism": {
+      "database_a": {"committed_operations": 41, "symbols": 386, "relations": 674},
+      "database_b": {"committed_operations": 41, "symbols": 386, "relations": 674},
+      "normalized_export_byte_equal": true,
+      "normalized_export_sha256": "6bec2c1e42384d452ccad63050701caa8f083499e60921af0c90459b2f94bc6d"
+    },
+    "kill_resume": {
+      "state": "COMPLETED",
+      "committed_operations": 41,
+      "non_committed_operations": 0,
+      "total_attempts": 42,
+      "max_attempt_count": 2,
+      "committed_operation_repeats": 0
+    }
+  },
+  "verification": [
+    {
+      "command": "powershell -NoProfile -Command '. .\\setup-poc-env.ps1; mvn -o -q verify'",
+      "exit_code": 0,
+      "result": "Full offline Maven verification passed; the existing integrity fixture emitted its expected E_INTEGRITY output."
+    },
+    {
+      "command": "P2-WP4 clean database A/B smoke runner",
+      "exit_code": 0,
+      "result": "Both clean runs scheduled 25 Java and 16 configuration operations, committed 41 operations, and produced 386 symbols and 674 relations."
+    },
+    {
+      "command": "P2-WP4 kill/resume smoke runner",
+      "exit_code": 0,
+      "result": "The process was terminated mid-index; resume completed the task with no committed operation repeat."
+    }
+  ],
+  "unresolved_blockers": [],
+  "next_preconditions": [
+    "POC-2-final.json may be emitted from this accepted P2-WP4 checkpoint.",
+    "Do not advance to POC-3 until the final handoff is present and validated."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}
