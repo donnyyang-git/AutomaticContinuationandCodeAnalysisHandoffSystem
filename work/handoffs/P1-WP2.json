@@ -1,0 +1,44 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-1",
+  "spec_version": "1.0.0",
+  "work_packet_id": "P1-WP2",
+  "work_packet_version": "1.0.0",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "repository_revision": "1a4ca9acde4fd0970159b3e92bd5873dbeca3158",
+  "changed_files": [
+    "src/main/java/io/handoff/runtime/AtomicWorkCoordinator.java",
+    "src/main/java/io/handoff/runtime/FailureInjection.java",
+    "src/main/java/io/handoff/runtime/InjectedFailureException.java",
+    "src/test/java/io/handoff/runtime/AtomicWorkCoordinatorTest.java"
+  ],
+  "artifact_paths": [
+    "work/handoffs/P1-WP2/automatic-continuation-poc.jar"
+  ],
+  "artifact_sha256": {
+    "work/handoffs/P1-WP2/automatic-continuation-poc.jar": "84f910860ebf964a4254be18abb7a54cfe2ac3bbd6bfc54a5bdc53514a3d3829"
+  },
+  "schema_version": "1.0.0",
+  "database_version": "1.0.0",
+  "verification_commands": [
+    "mvn -o -q -Dtest=AtomicWorkCoordinatorTest test",
+    "mvn -o -q test",
+    "mvn -o -q -DskipTests package"
+  ],
+  "verification_exit_codes": [0, 0, 0],
+  "verification_results": [
+    "Atomic failure-before-commit leaves the operation PENDING with zero evidence, then retry commits one evidence, result, event, and checkpoint.",
+    "Atomic failure-after-result rolls back result, evidence, event, and checkpoint together.",
+    "Re-running a committed operation returns the original result ID and leaves result/event row counts unchanged.",
+    "Complete test suite passed under setup-poc-env.ps1 with Java 21.0.13 and Maven 3.10.0.",
+    "Shaded package completed successfully."
+  ],
+  "unresolved_blockers": [],
+  "next_preconditions": [
+    "Accept P1-WP2 handoff.",
+    "Run P1-WP3 against repository revision 1a4ca9acde4fd0970159b3e92bd5873dbeca3158."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}
