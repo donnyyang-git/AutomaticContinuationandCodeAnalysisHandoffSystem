@@ -1,0 +1,47 @@
+{
+  "kind": "handoff",
+  "spec_id": "POC-1",
+  "spec_version": "1.0.0",
+  "work_packet_id": "P1-WP3",
+  "work_packet_version": "1.0.0",
+  "contract_version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "environment_version": "1.0.0",
+  "repository_revision": "8f4709c0c76a40595d59cc23673ac473084d1dad",
+  "changed_files": [
+    "src/main/java/io/handoff/cli/HandoffCommand.java",
+    "src/main/java/io/handoff/runtime/IntegrityFailure.java",
+    "src/main/java/io/handoff/runtime/IntegrityValidator.java",
+    "src/test/java/io/handoff/cli/HandoffIntegrityCliTest.java",
+    "src/test/java/io/handoff/runtime/IntegrityValidatorTest.java"
+  ],
+  "artifact_paths": [
+    "work/handoffs/P1-WP3/automatic-continuation-poc.jar"
+  ],
+  "artifact_sha256": {
+    "work/handoffs/P1-WP3/automatic-continuation-poc.jar": "632b40fe7970173613b956bcff5b6b716179d4fef9c8214729c58490511a4898"
+  },
+  "schema_version": "1.0.0",
+  "database_version": "1.0.0",
+  "verification_commands": [
+    "mvn -o -q -Dtest=IntegrityValidatorTest test",
+    "mvn -o -q -Dtest=HandoffIntegrityCliTest test",
+    "mvn -o -q test",
+    "mvn -o -q -DskipTests package"
+  ],
+  "verification_exit_codes": [0, 0, 0, 0],
+  "verification_results": [
+    "Untampered event chain and checkpoint validate successfully.",
+    "Tampered event payload creates an OPEN recovery review and task state REQUIRES_REVIEW.",
+    "Tampered checkpoint creates an OPEN recovery review and task state REQUIRES_REVIEW.",
+    "resume returns exit code 30 with E_INTEGRITY and does not execute pending work after checkpoint tamper.",
+    "Complete test suite passed under setup-poc-env.ps1 with Java 21.0.13 and Maven 3.10.0.",
+    "Shaded package completed successfully."
+  ],
+  "unresolved_blockers": [],
+  "next_preconditions": [
+    "Accept P1-WP3 handoff.",
+    "Run P1-WP4 against repository revision 8f4709c0c76a40595d59cc23673ac473084d1dad."
+  ],
+  "completed_at": "2026-11-04T00:00:00.000Z"
+}
