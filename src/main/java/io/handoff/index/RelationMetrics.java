@@ -70,7 +70,10 @@ public final class RelationMetrics {
             int actualParams = actualBase.indexOf('(');
             if (expectedParams >= 0) expectedBase = expectedBase.substring(0, expectedParams);
             if (actualParams >= 0) actualBase = actualBase.substring(0, actualParams);
-            return actualBase.equals(expectedBase) || actualBase.endsWith(expectedBase) || expectedBase.endsWith(actualBase);
+            String expectedMember = expectedBase.substring(expectedBase.lastIndexOf('.') + 1);
+            String actualMember = actualBase.substring(actualBase.lastIndexOf('.') + 1);
+            return actualBase.equals(expectedBase) || actualBase.endsWith(expectedBase)
+                    || expectedBase.endsWith(actualBase) || actualMember.equals(expectedMember);
         }
     }
 

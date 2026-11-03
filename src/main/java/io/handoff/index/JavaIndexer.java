@@ -129,29 +129,29 @@ public final class JavaIndexer {
     private static int persistSymbols(Connection connection, String snapshotId, String path, CompilationUnit unit,
             List<Diagnostic> diagnostics) throws SQLException {
         List<Symbol> symbols = new ArrayList<>();
-        unit.findAll(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration.class).forEach(declaration ->
+        unit.findAll(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration.class).stream().filter(JavaIndexer::topLevel).forEach(declaration ->
                 symbols.add(symbol("TYPE", declaration.getFullyQualifiedName().orElse(declaration.getNameAsString()), path, declaration, null)));
-        unit.findAll(com.github.javaparser.ast.body.EnumDeclaration.class).forEach(declaration ->
+        unit.findAll(com.github.javaparser.ast.body.EnumDeclaration.class).stream().filter(JavaIndexer::topLevel).forEach(declaration ->
                 symbols.add(symbol("TYPE", declaration.getFullyQualifiedName().orElse(declaration.getNameAsString()), path, declaration, null)));
-        unit.findAll(com.github.javaparser.ast.body.AnnotationDeclaration.class).forEach(declaration ->
+        unit.findAll(com.github.javaparser.ast.body.AnnotationDeclaration.class).stream().filter(JavaIndexer::topLevel).forEach(declaration ->
                 symbols.add(symbol("TYPE", declaration.getFullyQualifiedName().orElse(declaration.getNameAsString()), path, declaration, null)));
-        unit.findAll(com.github.javaparser.ast.body.RecordDeclaration.class).forEach(declaration ->
+        unit.findAll(com.github.javaparser.ast.body.RecordDeclaration.class).stream().filter(JavaIndexer::topLevel).forEach(declaration ->
                 symbols.add(symbol("TYPE", declaration.getFullyQualifiedName().orElse(declaration.getNameAsString()), path, declaration, null)));
-        unit.findAll(com.github.javaparser.ast.body.MethodDeclaration.class).forEach(declaration -> {
+        unit.findAll(com.github.javaparser.ast.body.MethodDeclaration.class).stream().filter(JavaIndexer::topLevel).forEach(declaration -> {
             String owner = owner(declaration);
             symbols.add(symbol("METHOD", owner + "." + declaration.getSignature().asString(), path, declaration, declaration.getSignature().asString()));
             try { declaration.resolve(); } catch (RuntimeException failure) {
                 diagnostics.add(new Diagnostic(path, line(declaration), "SYMBOL_SOLVER", message(failure)));
             }
         });
-        unit.findAll(com.github.javaparser.ast.body.ConstructorDeclaration.class).forEach(declaration -> {
+        unit.findAll(com.github.javaparser.ast.body.ConstructorDeclaration.class).stream().filter(JavaIndexer::topLevel).forEach(declaration -> {
             String owner = owner(declaration);
             symbols.add(symbol("CONSTRUCTOR", owner + "." + declaration.getSignature().asString(), path, declaration, declaration.getSignature().asString()));
             try { declaration.resolve(); } catch (RuntimeException failure) {
                 diagnostics.add(new Diagnostic(path, line(declaration), "SYMBOL_SOLVER", message(failure)));
             }
         });
-        unit.findAll(FieldDeclaration.class).forEach(declaration -> {
+        unit.findAll(FieldDeclaration.class).stream().filter(JavaIndexer::topLevel).forEach(declaration -> {
             String owner = owner(declaration);
             for (VariableDeclarator variable : declaration.getVariables()) {
                 symbols.add(symbol("FIELD", owner + "." + variable.getNameAsString(), path, declaration, declaration.toString()));
@@ -186,6 +186,13 @@ public final class JavaIndexer {
                 .or(() -> node.findAncestor(com.github.javaparser.ast.body.EnumDeclaration.class)
                         .map(type -> type.getFullyQualifiedName().orElse(type.getNameAsString())))
                 .orElse("<unknown>");
+    }
+
+    private static boolean topLevel(com.github.javaparser.ast.Node node) {
+        com.github.javaparser.ast.Node type = node instanceof com.github.javaparser.ast.body.TypeDeclaration<?>
+                ? node : node.findAncestor(com.github.javaparser.ast.body.TypeDeclaration.class).orElse(null);
+        return type != null && type.getParentNode()
+                .map(parent -> parent instanceof CompilationUnit).orElse(false);
     }
 
     private static void probeSymbolResolution(CompilationUnit unit, String path, List<Diagnostic> diagnostics) {

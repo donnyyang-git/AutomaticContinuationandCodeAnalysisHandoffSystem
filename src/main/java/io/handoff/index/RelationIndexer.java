@@ -56,17 +56,17 @@ final class RelationIndexer {
         }
         for (MethodCallExpr call : unit.findAll(MethodCallExpr.class)) {
             CallableDeclaration<?> callerNode = call.findAncestor(CallableDeclaration.class).orElse(null);
-            if (callerNode == null) continue;
+            if (!(callerNode instanceof MethodDeclaration)) continue;
             SymbolRef caller = findMember(symbols, callerNode).orElse(null);
             if (caller == null) continue;
             try {
                 ResolvedMethodLikeDeclaration target = call.resolve();
                 String targetName = target.getQualifiedName();
                 SymbolRef internal = findByResolvedName(connection, snapshotId, targetName);
-                relations.add(relation(snapshotId, caller, internal, "DIRECT_CALL", path, line(call),
+                relations.add(relation(snapshotId, caller, internal, "DIRECT_CALL", path, callLine(call),
                         internal == null ? target.getQualifiedSignature() : null));
             } catch (RuntimeException failure) {
-                diagnostics.add(new JavaIndexer.Diagnostic(path, line(call), "SYMBOL_SOLVER", message(failure)));
+                diagnostics.add(new JavaIndexer.Diagnostic(path, callLine(call), "SYMBOL_SOLVER", message(failure)));
             }
         }
         relations.sort(Comparator.comparing(Relation::canonical));
@@ -147,6 +147,8 @@ final class RelationIndexer {
     }
 
     private static int line(Node node) { return node.getBegin().map(position -> position.line).orElse(1); }
+
+    private static int callLine(MethodCallExpr call) { return call.getName().getBegin().map(position -> position.line).orElse(line(call)); }
     private static String message(Throwable failure) { return failure.getMessage() == null ? failure.getClass().getName() : failure.getMessage(); }
     private static String id(String value) {
         try { return hex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8))); }

@@ -20,7 +20,7 @@ class JavaIndexerTest {
         Path source = temp.resolve("project");
         Path java = source.resolve("src/main/java/example/Included.java");
         Files.createDirectories(java.getParent());
-        Files.writeString(java, "package example; public class Included { public void run() {} }\n");
+        Files.writeString(java, "package example; public class Included { public void run() {} class Nested { void hidden() {} } }\n");
         Files.writeString(source.resolve("Ignored.java"), "class Ignored {}\n");
         Path manifest = temp.resolve("manifest.json");
         Files.writeString(manifest, "{\"files\":[{\"path\":\"src/main/java/example/Included.java\"},{\"path\":\"Ignored.java\"}]}\n");
