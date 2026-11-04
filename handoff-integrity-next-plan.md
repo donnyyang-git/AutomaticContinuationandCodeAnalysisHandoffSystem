@@ -43,7 +43,9 @@
 - invocation、result revision、evidence links 與 review 由呼叫端提供的同一 DB transaction 持久化；ClaimValidator 不自行 commit。12 個 WP3 隔離 DB 測試通過。
 - `AtomicWorkCoordinator.commitAnalysisWorkItem` 已接通 Runtime work-item transaction：同一 commit 包含 evidence、invocation、result/review、event、checkpoint 與 work status/cursor；重試會重用既有 commit。
 - 新增 Runtime 整合測試驗證 commit 後 event/checkpoint integrity、重試冪等，以及注入失敗時整組 rollback；WP3 Runtime 整合測試映射記錄於 `specs/POC-3/README.md`。
-- 本機 LM Studio `/v1/models` 可連線，READY manifest 的 Model A `qwen/qwen3.5-9b` 列於載入模型；下一步進入 P3-WP4 實際模型 smoke 與恢復情境。
+- 已新增 opt-in P3-WP4 smoke test，使用固定 corpus 的 Account/Catalog/Order 宣告與欄位片段；預設 skip，必須明確啟用才呼叫模型。
+- 本機 LM Studio `/v1/models` 可連線，READY manifest 的 Model A `qwen/qwen3.5-9b` 列於載入模型；但 `/v1/chat/completions` 實際嘗試分別在約 181 秒與 600 秒 timeout。使用修正後 evidence range 的嘗試，在約 8 分鐘時因無可見服務活動且 socket 已消失而中止。
+- 尚無實際模型 completion 或 invocation commit；P3-WP4 未驗收，不可把 protocol fixture 測試當成模型 smoke 成功。
 
 ## 四、風險與限制
 
@@ -51,16 +53,16 @@
 - `create-task` CLI 缺口尚未處理；需要 CLI 建立正式 task/snapshot 時，先補齊命令及其測試。
 - P3-WP1/P3-WP2/P3-WP3 測試使用臨時資料庫或 loopback fixture，沒有修改正式工作 DB，也沒有連接實際模型。
 - P3-WP3 persistence API 由 Runtime 呼叫端管理 transaction；`commitAnalysisWorkItem` 已完成 event/checkpoint/status 接線，但尚未執行實際模型 crash/recovery 情境。
-- 尚未完成實際模型 smoke 與完整 recovery orchestration；`create-task` CLI 仍未處理。
+- 實際模型 smoke 受 LM Studio completion 不回應阻塞；需先確認本機服務/模型生成正常後再重跑。完整 crash/recovery orchestration 與 `create-task` CLI 仍未完成。
 
 ## 五、總結
 
-本次確認 `work/handoff.db` 只是預設路徑，未發現實際 DB 或 stale checkpoint；resume gate 已由隔離測試覆蓋。P3-WP1/2/3 與 Runtime atomic claim commit 接線已實作；全套離線 verify 為 44 個測試通過。下一步為 P3-WP4 實際模型 smoke/恢復情境；CLI `create-task` 仍保留待辦。
+本次確認 `work/handoff.db` 只是預設路徑，未發現實際 DB 或 stale checkpoint；resume gate 已由隔離測試覆蓋。P3-WP1/2/3 與 Runtime atomic claim commit 接線已實作；全套離線 verify 為 45 個測試、0 failures/errors、1 個 opt-in smoke 預設 skip。真實模型 completion 尚未成功，P3-WP4 仍受本機 LM Studio 無回應阻塞；CLI `create-task` 與 recovery 情境也保留待辦。
 
 ## 六、本次交接更新
 
-- 交接 ID：`HND-20261105-004532-2D49A6F1`
-- 最後更新時間：`2026-11-05T00:45:32+08:00`
+- 交接 ID：`HND-20261105-011631-9F3C72A4`
+- 最後更新時間：`2026-11-05T01:16:31+08:00`
 
 ### 開發歷程
 
@@ -73,3 +75,4 @@
 | 2026-11-05T00:17:11+08:00 | 完成 P3-WP3 claim validation/persistence slice 與測試；`mvn -o -q verify` 通過，41 個測試（0 failures、0 errors、0 skipped）。完整 Runtime event/checkpoint 接線和實際模型 smoke 尚未完成。 |
 | 2026-11-05T00:21:13+08:00 | 加入 duplicate logical claim ID 的 preflight rejection，並以 `mvn -o -q verify` 完成最終檢查：42 個測試通過（0 failures、0 errors、0 skipped）。完整 Runtime event/checkpoint 接線和實際模型 smoke 仍待完成。 |
 | 2026-11-05T00:45:32+08:00 | 完成 `commitAnalysisWorkItem` Runtime atomic integration，含 idempotent retry、event/checkpoint integrity 與 rollback 測試；`mvn -o -q verify` 通過（44 個測試，0 failures、0 errors、0 skipped）。本機 LM Studio 已列出 Model A；P3-WP4 實際模型 smoke/恢復情境待執行。 |
+| 2026-11-05T01:16:31+08:00 | 新增預設 skip 的 P3-WP4 smoke harness；`mvn -o -q verify` 通過（45 tests，0 failures、0 errors、1 skipped）。LM Studio model list 正常，但 chat completion 曾 timeout（約 181 秒、600 秒）；修正 evidence range 後的嘗試因無活動中止，沒有實際 invocation commit。 |

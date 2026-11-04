@@ -86,6 +86,12 @@ Runtime transaction integration (`mvn -o -q "-Dtest=AtomicWorkCoordinatorTest" t
 
 Run at least one account, catalog, and order analysis work item through the selected local provider using Model A. Kill during one invocation. If no committed invocation/result exists, retry under same operation; if committed, reuse. A selected provider unavailable exits 40 with `E_LLM_UNAVAILABLE` and preserves committed work. Re-enable the provider and resume.
 
+Opt-in smoke test mapping (`mvn -o -q "-Dtest=P3Wp4LocalModelSmokeTest" "-Dhandoff.localModelSmoke=true" test`; actual local model request, not part of the default suite):
+
+| Test | File | Behavior verified |
+|---|---|---|
+| `analyzesOneFixedCorpusSubjectWithTheSelectedLocalModel` | `src/test/java/io/handoff/analysis/P3Wp4LocalModelSmokeTest.java` | Uses Model A from the READY environment manifest on a bounded fixed-corpus excerpt, persists the invocation and validated result atomically, and validates the event/checkpoint chain. Defaults to `account`; select `catalog` or `order` with `-Dhandoff.smoke.subject=<name>`. |
+
 ## Acceptance
 
 - Actual selected-provider `/v1/chat/completions` request observed on loopback with a valid model identifier; both Ollama and LM Studio provider modes MUST be covered by protocol tests. A missing provider digest is accepted only with `UNPINNED_MODEL` disclosure.
