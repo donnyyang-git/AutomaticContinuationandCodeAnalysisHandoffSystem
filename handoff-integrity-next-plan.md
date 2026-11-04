@@ -18,30 +18,44 @@
 
 ## 二、已確認的狀態
 
-- 目前問題不再是環境不足，也不再是 Maven 依賴解析失敗。
-- 當前仍有需要注意的，是工作資料庫中既有的 stale checkpoint 或歷史 DB 狀態，這會導致 resume / validate 流程在執行時觸發 `E_INTEGRITY`。
-- 我們尚未啟動 POC-3 工作包，這次交接僅處理環境修正與 integrity 診斷，未進入功能實作。
+- 專案環境已可使用 Java 21 + Maven 3.10；目前 PowerShell 的 Maven 路徑已修正。
+- `work/handoff.db` 是 CLI 預設路徑，但目前工作區不存在此檔案，兩個遠端分支也沒有此資料庫；因此尚無證據顯示有 stale checkpoint。
+- 工作區另一個 `work/handoffs/POC-0-WP2/handoff-startup.db` 沒有 checkpoint rows，不能代替 `work/handoff.db`。
+- `HandoffCommand` 尚未提供 `create-task` 子命令；此 CLI 缺口本次明確記為未處理，不阻擋 P3-WP1。
+- POC-2 handoff 為 accepted；POC-3 的 P3-WP1 Evidence Manager 已開始並完成本次實作。
 
 ## 三、接下來的計畫
 
 ### Phase 1：清理 stale runtime state
-- 釐清目前 `work/handoff.db` 是否為舊 checkpoint 或損壞資料。
-- 若確定為 stale state，先建立乾淨資料庫再重新驗證 `create-task` / `status` / `resume`。
+- 目前 `work/handoff.db` 不存在，因此沒有資料可清理，也沒有重建正式工作資料庫。
+- 若之後從原環境取得該 DB，先備份並檢查後再決定是否清理；不可把預設路徑當成 DB 已存在的證據。
 
 ### Phase 2：確認 resume gate 正常
-- 重新跑最小驗證流程，確保 resume 不會在未清理 stale checkpoint 的情況下繼續前進。
-- 確認 `REQUIRES_REVIEW`、review 記錄與 event chain 都符合規範。
+- 使用 JUnit 臨時資料庫驗證 pause/resume 可完成，以及 tampered checkpoint 會阻止 resume 並建立 review。
+- 此驗證不代表曾經存在的工作 DB 已修復；CLI `create-task` 尚未實作，後續另行處理。
 
 ### Phase 3：正式進入 POC-3
-- 當 integrity gate 正常後，再開始 P3-WP1 及後續工作包。
-- 先不進行任何額外重構，避免在未確認 stale state 前擴大改動範圍。
+- P3-WP1 已新增 Evidence Manager：驗證快照成員、來源檔案 hash/size、路徑與行範圍，並以穩定 ID 寫入既有 evidence schema。
+- excerpt 遮蔽 JSON 敏感欄位、Authorization 值、JDBC URL credentials 與 PEM private-key 區塊；測試映射記錄於 `specs/POC-3/README.md`。
+- 下一步可進入 P3-WP2；實際模型 smoke 仍須依 READY environment manifest 選定 provider/model 後另行執行。
 
 ## 四、風險與限制
 
-- 不在本交接範圍內啟動 POC-3 工作項目。
-- 若直接在現有 `work/handoff.db` 上繼續執行，仍可能重現 `E_INTEGRITY`。
-- 真正的關鍵修正，應以「清淨資料庫 + 確認 resume flow」作為前提，而不是直接開始功能開發。
+- 本次未取得或檢查任何舊環境的 `work/handoff.db`；不得推論其內容或狀態。
+- `create-task` CLI 缺口尚未處理；需要 CLI 建立正式 task/snapshot 時，先補齊命令及其測試。
+- Evidence Manager 的測試使用臨時資料庫，沒有修改正式工作 DB。
 
 ## 五、總結
 
-本次已完成的工作重點，是把專案從「環境阻塞」帶回到「正確的驗證軌道」，並留下可重複執行的 checkpoint 診斷腳本，供下一段工作接續使用。下一步應以清理 stale state 為核心，再進入 POC-3 工作包。
+本次確認 `work/handoff.db` 只是預設路徑，未發現實際 DB 或 stale checkpoint；resume gate 已由隔離測試覆蓋。POC-3 P3-WP1 已開始並完成本次 Evidence Manager 切片，CLI `create-task` 缺口保留為未處理事項。
+
+## 六、本次交接更新
+
+- 交接 ID：`HND-20261104-223925-7F3B1A2C`
+- 最後更新時間：`2026-11-04T22:39:25+08:00`
+
+### 開發歷程
+
+| 時間（ISO 8601） | 進度 |
+|---|---|
+| 2026-11-04T22:39:25+08:00 | 確認預設 DB 不存在且未上傳；將缺少 `create-task` 記為未處理；完成 P3-WP1 Evidence Manager 與 23 個 Maven 測試（0 failures、0 errors、0 skipped）。 |

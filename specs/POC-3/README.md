@@ -16,6 +16,14 @@ The selected provider MUST be loopback-only and use the OpenAI-compatible `/v1/c
 
 Allowed: `evidence/**`, its persistence adapter/tests. Create evidence only from the current immutable snapshot. Validate path, inclusive line range, exact bytes/content hash, snapshot membership, and redaction. Evidence IDs are stable for identical snapshot/kind/path/range/content hash. Changed/missing content cannot validate.
 
+WP1 test mapping (`mvn -q "-Dtest=EvidenceManagerTest" test`):
+
+| Test | File | Behavior verified |
+|---|---|---|
+| `createsStableEvidenceForInclusiveLinesAndRedactsSecrets` | `src/test/java/io/handoff/evidence/EvidenceManagerTest.java` | Stable evidence ID, inclusive-range hash, and redaction of JSON secrets, Authorization values, JDBC URL credentials, and PEM private keys. |
+| `rejectsFilesThatChangedAfterSnapshotCreation` | `src/test/java/io/handoff/evidence/EvidenceManagerTest.java` | Changed source bytes are rejected and no evidence row is written. |
+| `rejectsUnlistedFilesAndInvalidInclusiveRanges` | `src/test/java/io/handoff/evidence/EvidenceManagerTest.java` | Files outside the snapshot and invalid inclusive line ranges are rejected without writes. |
+
 ### P3-WP2 — Local LLM adapter and prompt builder
 
 Allowed: `analysis/**` provider adapter/prompt builder, tests using a local deterministic HTTP fixture only for protocol errors, actual-model smoke separately. The adapter exposes one interface: analyze a bounded work item and return raw invocation plus parsed response. It MUST support both `ollama` and `lm-studio` through the same OpenAI-compatible request/response normalization and must not write confirmed results.
