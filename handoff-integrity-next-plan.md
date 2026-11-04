@@ -22,7 +22,7 @@
 - `work/handoff.db` 是 CLI 預設路徑，但目前工作區不存在此檔案，兩個遠端分支也沒有此資料庫；因此尚無證據顯示有 stale checkpoint。
 - 工作區另一個 `work/handoffs/POC-0-WP2/handoff-startup.db` 沒有 checkpoint rows，不能代替 `work/handoff.db`。
 - `HandoffCommand` 尚未提供 `create-task` 子命令；此 CLI 缺口本次明確記為未處理，不阻擋 P3-WP1。
-- POC-2 handoff 為 accepted；POC-3 的 P3-WP1 Evidence Manager 已開始並完成本次實作。
+- POC-2 handoff 為 accepted；P3-WP1 Evidence Manager 與 P3-WP2 local LLM adapter/prompt builder 已完成本次實作。
 
 ## 三、接下來的計畫
 
@@ -37,25 +37,31 @@
 ### Phase 3：正式進入 POC-3
 - P3-WP1 已新增 Evidence Manager：驗證快照成員、來源檔案 hash/size、路徑與行範圍，並以穩定 ID 寫入既有 evidence schema。
 - excerpt 遮蔽 JSON 敏感欄位、Authorization 值、JDBC URL credentials 與 PEM private-key 區塊；測試映射記錄於 `specs/POC-3/README.md`。
-- 下一步可進入 P3-WP2；實際模型 smoke 仍須依 READY environment manifest 選定 provider/model 後另行執行。
+- P3-WP2 已新增 bounded prompt builder 與共用 OpenAI-compatible adapter，支援 Ollama/LM Studio，僅接受 READY manifest 所列 model 與 loopback HTTP endpoint。
+- adapter 回傳 invocation metadata、hash、raw completion 與 parsed JSON，不直接寫 DB 或確認分析結果；六個本機 HTTP fixture 測試記錄於 `specs/POC-3/README.md`。
+- 下一步可進入 P3-WP3 Claim Validator；實際模型 smoke 與 invocation persistence 尚未執行/實作。
 
 ## 四、風險與限制
 
 - 本次未取得或檢查任何舊環境的 `work/handoff.db`；不得推論其內容或狀態。
 - `create-task` CLI 缺口尚未處理；需要 CLI 建立正式 task/snapshot 時，先補齊命令及其測試。
-- Evidence Manager 的測試使用臨時資料庫，沒有修改正式工作 DB。
+- P3-WP1/P3-WP2 測試使用臨時資料庫或 loopback fixture，沒有修改正式工作 DB，也沒有連接實際模型。
+- 尚未完成實際模型 smoke、model invocation 的 SQLite persistence、POC-3 WP3 claim validation。
 
 ## 五、總結
 
-本次確認 `work/handoff.db` 只是預設路徑，未發現實際 DB 或 stale checkpoint；resume gate 已由隔離測試覆蓋。POC-3 P3-WP1 已開始並完成本次 Evidence Manager 切片，CLI `create-task` 缺口保留為未處理事項。
+本次確認 `work/handoff.db` 只是預設路徑，未發現實際 DB 或 stale checkpoint；resume gate 已由隔離測試覆蓋。P3-WP1 Evidence Manager 與 P3-WP2 provider/prompt 切片已完成 fixture 測試；全套 29 個 Maven 測試通過。CLI `create-task`、真實模型 smoke、invocation persistence 與 WP3 claim validation 保留待辦。
 
 ## 六、本次交接更新
 
-- 交接 ID：`HND-20261104-223925-7F3B1A2C`
-- 最後更新時間：`2026-11-04T22:39:25+08:00`
+- 交接 ID：`HND-20261104-225750-6E2C91AF`
+- 最後更新時間：`2026-11-04T22:57:50+08:00`
 
 ### 開發歷程
 
 | 時間（ISO 8601） | 進度 |
 |---|---|
 | 2026-11-04T22:39:25+08:00 | 確認預設 DB 不存在且未上傳；將缺少 `create-task` 記為未處理；完成 P3-WP1 Evidence Manager 與 23 個 Maven 測試（0 failures、0 errors、0 skipped）。 |
+| 2026-11-04T22:54:53+08:00 | 完成 P3-WP2 prompt/provider fixture slice；兩種 provider 共用 loopback OpenAI-compatible request，manifest gate 與 prompt redaction 通過；全套 28 個 Maven 測試通過（0 failures、0 errors、0 skipped）。真實模型 smoke、invocation DB persistence、WP3 與 `create-task` 尚未完成。 |
+| 2026-11-04T22:56:29+08:00 | 加入 provider HTTP 503 與 missing-model 錯誤映射測試；最終全套離線測試 29 個通過（0 failures、0 errors、0 skipped）。 |
+| 2026-11-04T22:57:50+08:00 | 修正 WP2 測試使用的 JSON Schema fixture；重跑 `mvn -o -q test`，29 個測試通過（0 failures、0 errors、0 skipped）。 |

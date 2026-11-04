@@ -30,6 +30,17 @@ Allowed: `analysis/**` provider adapter/prompt builder, tests using a local dete
 
 Prompt includes task, subject, authoritative parser facts, bounded evidence excerpts, claim schema, and explicit unknown handling. It excludes conversation history and unrelated corpus files.
 
+WP2 test mapping (`mvn -o -q "-Dtest=OpenAiCompatibleAnalysisProviderTest" test`; loopback HTTP fixture only, no actual model invocation):
+
+| Test | File | Behavior verified |
+|---|---|---|
+| `bothProvidersUseLoopbackChatCompletionsAndReturnParsedJson` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | Ollama and LM Studio use the same `/v1/chat/completions` request, fixed sampling parameters, JSON-schema response format, and parsed completion result. |
+| `promptContainsOnlyBoundedContextAndRedactsSecretsAndAbsolutePaths` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | Prompt includes only task, subject, parser facts, evidence excerpts, and schema; absolute paths and secrets are redacted. |
+| `rejectsNonLoopbackEndpointsBeforeSendingRequests` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | Non-loopback or non-HTTP endpoints fail before a provider request is sent. |
+| `rejectsModelsNotListedInTheReadyEnvironmentManifest` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | A model absent from a READY environment manifest is rejected. |
+| `malformedCompletionIsRejectedAsInvalidSchemaOutput` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | Non-JSON model completion returns `E_SCHEMA_INVALID`. |
+| `mapsProviderAvailabilityAndMissingModelResponsesToContractErrors` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | HTTP 503 maps to `E_LLM_UNAVAILABLE`; a missing-model response maps to `E_MODEL_MISSING` without exposing the provider body. |
+
 ### P3-WP3 — Claim validator and revision persistence
 
 Validate `analysis.schema.json`, evidence existence/snapshot/range/hash, allowed evidence by claim type, parser non-contradiction, and status rules. Only validated claims enter `analysis_result`. `CONFIRMED` without valid evidence becomes `UNSUPPORTED` and opens review; inferred claims require reason. Persist revision and evidence links in the Runtime transaction.
