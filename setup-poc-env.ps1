@@ -1,14 +1,29 @@
 $pocToolsPath = "C:\softwares"
-$env:JAVA_HOME = "$pocToolsPath\Java\OpenJDK21U-jdk_x64_windows_hotspot_21.0.13_9\jdk-21.0.13+9"
-$env:MAVEN_HOME = "$pocToolsPath\apache-maven-3.10.0"
 
-# 設定 Path，確保優先順序：將自訂的 bin 放在最前面
-$env:Path = "$env:JAVA_HOME\bin;$env:MAVEN_HOME\bin;" + $env:Path
+$javaHome = "$pocToolsPath\java\OpenJDK21U-jdk_x64_windows_hotspot_21.0.13_9\jdk-21.0.13+9"
+$mavenHome = "$pocToolsPath\maven\apache-maven-3.10.0"
 
-# 設定 Maven Repository 隔離，避免污染全域套件
+if (-not (Test-Path $javaHome)) {
+    throw "Missing Java 21 at $javaHome"
+}
+if (-not (Test-Path $mavenHome)) {
+    throw "Missing Maven 3.10 at $mavenHome"
+}
+
+$env:JAVA_HOME = $javaHome
+$env:MAVEN_HOME = $mavenHome
 $env:MAVEN_OPTS = "-Dmaven.repo.local=$pocToolsPath\m2-repository"
 
-# 進入此指令視窗後，立即驗證
+# 清掉所有舊 Maven PATH，確保優先用 3.10
+$cleanPath = ($env:Path -split ';' | Where-Object {
+    $_ -and
+    $_ -notmatch 'apache-maven-3\.[0-9]+\.[0-9]+' -and
+    $_ -notmatch 'maven\\bin$' -and
+    $_ -notmatch 'maven/bin$'
+}) -join ';'
+
+$env:Path = "$env:JAVA_HOME\bin;$env:MAVEN_HOME\bin;$cleanPath"
+
 Write-Host "POC Environment Initialized" -ForegroundColor Green
 java -version
 mvn -version
