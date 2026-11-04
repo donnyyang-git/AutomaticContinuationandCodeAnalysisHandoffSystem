@@ -1,12 +1,23 @@
 package io.handoff.runtime;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.handoff.analysis.AnalysisProviderException;
+import io.handoff.analysis.ClaimValidator;
+import io.handoff.analysis.OpenAiCompatibleAnalysisProvider;
+import io.handoff.evidence.EvidenceManager;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 public final class AtomicWorkCoordinator {
@@ -15,8 +26,16 @@ public final class AtomicWorkCoordinator {
     private static final String PROMPT_VERSION = "fixture-prompt-1.0.0";
     private static final String ANALYSIS_SCHEMA_VERSION = "1.0.0";
     private static final String CHECKPOINT_SCHEMA_VERSION = "1.0.0";
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     public record CommitResult(String operationId, String resultId, String evidenceId, long eventSequence) {}
+
+    public record AnalysisCommitResult(
+            List<ClaimValidator.ValidatedClaim> claims, long eventSequence, boolean reviewRequired) {
+        public AnalysisCommitResult {
+            claims = List.copyOf(claims);
+        }
+    }
 
     private final Connection connection;
 
@@ -84,6 +103,85 @@ public final class AtomicWorkCoordinator {
         }
     }
 
+    public AnalysisCommitResult commitAnalysisWorkItem(
+            String taskId,
+            String operationId,
+            FailureInjection injection,
+            List<EvidenceManager.Evidence> preparedEvidence,
+            Path sourceRoot,
+            OpenAiCompatibleAnalysisProvider.Invocation invocation,
+            String analysisSchema,
+            List<ClaimValidator.ParserFact> parserFacts)
+            throws SQLException, InjectedFailureException, RuntimeException, AnalysisProviderException {
+        connection.setAutoCommit(false);
+        try {
+            AnalysisCommitResult existing = existingAnalysisCommit(taskId, operationId);
+            if (existing != null) {
+                connection.rollback();
+                return existing;
+            }
+            WorkItem item = pendingWorkItem(taskId, operationId);
+            if (item == null) {
+                throw new RuntimeException("E_PRECONDITION", "Unknown or non-pending operation: " + operationId);
+            }
+            if (injection == FailureInjection.PROCESS_KILL_BEFORE_COMMIT) {
+                throw new InjectedFailureException(injection);
+            }
+
+            String snapshotId = snapshotId(taskId);
+            EvidenceManager evidenceManager = new EvidenceManager(connection, sourceRoot);
+            for (EvidenceManager.Evidence evidence : preparedEvidence) {
+                evidenceManager.persistPreparedEvidence(evidence);
+            }
+            ClaimValidator.Result validated = new ClaimValidator(connection, evidenceManager, analysisSchema)
+                    .persist(taskId, operationId, invocation, parserFacts);
+            if (injection == FailureInjection.PROCESS_KILL_AFTER_RESULT) {
+                throw new InjectedFailureException(injection);
+            }
+
+            String now = Instant.now().toString();
+            long sequence = nextEventSequence(taskId);
+            String payload = analysisEventPayload(operationId, validated.claims());
+            String payloadSha = sha256(payload);
+            String previousHash = previousEventHash(taskId);
+            String eventHash = sha256(taskId + "\n" + sequence + "\nWORK_COMMITTED\n" + now + "\n"
+                    + payloadSha + "\n" + previousHash);
+            insertEvent(taskId, operationId, sequence, now, payload, payloadSha, previousHash, eventHash);
+
+            List<String> evidenceIds = new ArrayList<>();
+            for (ClaimValidator.ValidatedClaim claim : validated.claims()) {
+                evidenceIds.addAll(claim.evidenceRefs());
+            }
+                String evidenceRefsJson = serializeRuntimeJson(evidenceIds.stream().distinct().sorted().toList());
+            String state = validated.reviewRequired() ? TaskState.REQUIRES_REVIEW.name() : TaskState.ANALYZING.name();
+                Map<String, Object> taskState = new TreeMap<>();
+                taskState.put("cursor_operation_id", operationId);
+                taskState.put("state", state);
+                String taskStateJson = serializeRuntimeJson(taskState);
+                Map<String, Object> verifiedFacts = new TreeMap<>();
+                verifiedFacts.put("operation_id", operationId);
+                verifiedFacts.put("result_ids", validated.claims().stream()
+                    .map(ClaimValidator.ValidatedClaim::resultId).sorted().toList());
+                String verifiedFactsJson = serializeRuntimeJson(verifiedFacts);
+            String pendingStepsJson = "[]";
+            String promptVersion = invocation.promptVersion();
+            String checkpointContent = taskStateJson + verifiedFactsJson + pendingStepsJson + evidenceRefsJson
+                    + operationId + snapshotId + PARSER_VERSION + promptVersion + ANALYSIS_SCHEMA_VERSION
+                    + CHECKPOINT_SCHEMA_VERSION;
+            insertCheckpoint(taskId, sequence, taskStateJson, verifiedFactsJson, pendingStepsJson,
+                    evidenceRefsJson, operationId, snapshotId, sha256(checkpointContent), now,
+                    PARSER_VERSION, promptVersion, ANALYSIS_SCHEMA_VERSION, CHECKPOINT_SCHEMA_VERSION);
+            markCommitted(taskId, operationId, now);
+            connection.commit();
+            return new AnalysisCommitResult(validated.claims(), sequence, validated.reviewRequired());
+        } catch (SQLException | InjectedFailureException | RuntimeException | AnalysisProviderException failure) {
+            rollbackQuietly();
+            throw failure;
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
+
     private ExistingCommit existingCommit(String operationId) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT r.result_id,e.evidence_id,ev.sequence FROM analysis_result r "
@@ -95,6 +193,99 @@ public final class AtomicWorkCoordinator {
             try (ResultSet result = statement.executeQuery()) {
                 return result.next() ? new ExistingCommit(result.getString(1), result.getString(2), result.getLong(3)) : null;
             }
+        }
+    }
+
+    private AnalysisCommitResult existingAnalysisCommit(String taskId, String operationId) throws SQLException {
+        long sequence;
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT sequence FROM execution_event WHERE task_id=? AND operation_id=? AND event_type='WORK_COMMITTED'")) {
+            statement.setString(1, taskId);
+            statement.setString(2, operationId);
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    return null;
+                }
+                sequence = result.getLong(1);
+            }
+        }
+
+        List<ClaimValidator.ValidatedClaim> claims = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT result_id,logical_claim_id,revision,claim_type,subject,claim_text,confidence,status,inference_reason "
+                        + "FROM analysis_result WHERE task_id=? AND operation_id=? ORDER BY logical_claim_id,revision")) {
+            statement.setString(1, taskId);
+            statement.setString(2, operationId);
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    String resultId = result.getString(1);
+                    claims.add(new ClaimValidator.ValidatedClaim(
+                            resultId,
+                            result.getString(2),
+                            result.getInt(3),
+                            result.getString(4),
+                            result.getString(5),
+                            result.getString(6),
+                            result.getString(7),
+                            result.getString(8),
+                            result.getString(9),
+                            resultEvidenceRefs(resultId)));
+                }
+            }
+        }
+        boolean reviewRequired;
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT state='REQUIRES_REVIEW' FROM task_state WHERE task_id=?")) {
+            statement.setString(1, taskId);
+            try (ResultSet result = statement.executeQuery()) {
+                reviewRequired = result.next() && result.getBoolean(1);
+            }
+        }
+        return new AnalysisCommitResult(claims, sequence, reviewRequired);
+    }
+
+    private List<String> resultEvidenceRefs(String resultId) throws SQLException {
+        List<String> evidenceIds = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT evidence_id FROM analysis_result_evidence WHERE result_id=? ORDER BY evidence_id")) {
+            statement.setString(1, resultId);
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    evidenceIds.add(result.getString(1));
+                }
+            }
+        }
+        return List.copyOf(evidenceIds);
+    }
+
+    private static String analysisEventPayload(
+            String operationId, List<ClaimValidator.ValidatedClaim> claims) throws SQLException {
+        List<Map<String, Object>> eventClaims = claims.stream()
+                .sorted(Comparator.comparing(ClaimValidator.ValidatedClaim::resultId))
+                .map(claim -> {
+                    Map<String, Object> values = new TreeMap<>();
+                    values.put("logical_claim_id", claim.logicalClaimId());
+                    values.put("result_id", claim.resultId());
+                    values.put("revision", claim.revision());
+                    values.put("status", claim.status());
+                    return values;
+                })
+                .toList();
+        Map<String, Object> payload = new TreeMap<>();
+        payload.put("claims", eventClaims);
+        payload.put("operation_id", operationId);
+        try {
+            return JSON.writeValueAsString(payload);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException failure) {
+            throw new SQLException("Unable to serialize analysis event", failure);
+        }
+    }
+
+    private static String serializeRuntimeJson(Object value) throws SQLException {
+        try {
+            return JSON.writeValueAsString(value);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException failure) {
+            throw new SQLException("Unable to serialize Runtime checkpoint data", failure);
         }
     }
 
@@ -212,6 +403,15 @@ public final class AtomicWorkCoordinator {
     private void insertCheckpoint(String taskId, long sequence, String taskStateJson, String verifiedFactsJson,
             String pendingStepsJson, String evidenceRefsJson, String cursor, String snapshotId, String contentSha,
             String now) throws SQLException {
+        insertCheckpoint(taskId, sequence, taskStateJson, verifiedFactsJson, pendingStepsJson,
+            evidenceRefsJson, cursor, snapshotId, contentSha, now,
+            PARSER_VERSION, PROMPT_VERSION, ANALYSIS_SCHEMA_VERSION, CHECKPOINT_SCHEMA_VERSION);
+        }
+
+        private void insertCheckpoint(String taskId, long sequence, String taskStateJson, String verifiedFactsJson,
+            String pendingStepsJson, String evidenceRefsJson, String cursor, String snapshotId, String contentSha,
+            String now, String parserVersion, String promptVersion, String analysisSchemaVersion,
+            String checkpointSchemaVersion) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
                 "INSERT INTO checkpoint(checkpoint_id,task_id,sequence,task_state_json,verified_facts_json,pending_steps_json,evidence_refs_json,cursor_operation_id,snapshot_id,parser_version,prompt_version,analysis_schema_version,checkpoint_schema_version,content_sha256,created_at) "
                         + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
@@ -224,10 +424,10 @@ public final class AtomicWorkCoordinator {
             statement.setString(7, evidenceRefsJson);
             statement.setString(8, cursor);
             statement.setString(9, snapshotId);
-            statement.setString(10, PARSER_VERSION);
-            statement.setString(11, PROMPT_VERSION);
-            statement.setString(12, ANALYSIS_SCHEMA_VERSION);
-            statement.setString(13, CHECKPOINT_SCHEMA_VERSION);
+            statement.setString(10, parserVersion);
+            statement.setString(11, promptVersion);
+            statement.setString(12, analysisSchemaVersion);
+            statement.setString(13, checkpointSchemaVersion);
             statement.setString(14, contentSha);
             statement.setString(15, now);
             statement.executeUpdate();

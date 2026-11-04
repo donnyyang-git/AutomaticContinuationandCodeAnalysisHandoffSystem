@@ -55,6 +55,11 @@ public final class EvidenceManager {
 
     public Evidence createEvidence(String taskId, String kind, String path, int startLine, int endLine)
             throws SQLException, RuntimeException {
+        return insertPreparedEvidence(prepareEvidence(taskId, kind, path, startLine, endLine));
+    }
+
+    public Evidence prepareEvidence(String taskId, String kind, String path, int startLine, int endLine)
+            throws SQLException, RuntimeException {
         if (taskId == null || taskId.isBlank() || kind == null || kind.isBlank()) {
             throw invalidEvidence("Task and evidence kind are required");
         }
@@ -81,24 +86,41 @@ public final class EvidenceManager {
         String status = redactedExcerpt.equals(excerpt) ? "VALID" : "REDACTED";
         String evidenceId = stableEvidenceId(
                 snapshotId, kind, normalizedPath, startLine, endLine, contentSha256);
+        return new Evidence(evidenceId, taskId, snapshotId, kind, normalizedPath,
+            startLine, endLine, contentSha256, redactedExcerpt, status);
+        }
 
+        public Evidence persistPreparedEvidence(Evidence prepared)
+            throws SQLException, RuntimeException {
+        if (connection.getAutoCommit()) {
+            throw new RuntimeException("E_PRECONDITION", "Prepared evidence must be persisted in a Runtime transaction");
+        }
+        Evidence current = prepareEvidence(
+            prepared.taskId(), prepared.kind(), prepared.path(), prepared.startLine(), prepared.endLine());
+        if (!current.equals(prepared)) {
+            throw invalidEvidence("Prepared evidence no longer matches the immutable snapshot");
+        }
+        return insertPreparedEvidence(current);
+        }
+
+        private Evidence insertPreparedEvidence(Evidence prepared) throws SQLException, RuntimeException {
         try (PreparedStatement insert = connection.prepareStatement(
                 "INSERT OR IGNORE INTO evidence(evidence_id,task_id,snapshot_id,kind,path,start_line,end_line,"
                         + "content_sha256,redacted_excerpt,status,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)")) {
-            insert.setString(1, evidenceId);
-            insert.setString(2, taskId);
-            insert.setString(3, snapshotId);
-            insert.setString(4, kind);
-            insert.setString(5, normalizedPath);
-            insert.setInt(6, startLine);
-            insert.setInt(7, endLine);
-            insert.setString(8, contentSha256);
-            insert.setString(9, redactedExcerpt);
-            insert.setString(10, status);
+            insert.setString(1, prepared.evidenceId());
+            insert.setString(2, prepared.taskId());
+            insert.setString(3, prepared.snapshotId());
+            insert.setString(4, prepared.kind());
+            insert.setString(5, prepared.path());
+            insert.setInt(6, prepared.startLine());
+            insert.setInt(7, prepared.endLine());
+            insert.setString(8, prepared.contentSha256());
+            insert.setString(9, prepared.redactedExcerpt());
+            insert.setString(10, prepared.status());
             insert.setString(11, Instant.now().toString());
             insert.executeUpdate();
         }
-        return findEvidence(evidenceId);
+        return findEvidence(prepared.evidenceId());
     }
 
     public Evidence validateEvidence(String taskId, String evidenceId) throws SQLException, RuntimeException {

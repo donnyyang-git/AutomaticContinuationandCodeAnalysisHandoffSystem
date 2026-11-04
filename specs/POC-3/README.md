@@ -47,7 +47,7 @@ Validate `analysis.schema.json`, evidence existence/snapshot/range/hash, allowed
 
 A retry yielding a materially different normalized claim appends a `CONFLICTING` revision and opens review; it never replaces the earlier revision or auto-selects one.
 
-The initial deterministic parser-conflict checks cover mismatched or explicitly negated declaration kinds and explicit denial of a named parser-authoritative direct call; they are not a general natural-language contradiction detector. `ClaimValidator.persist` requires a caller-owned transaction and does not commit it.
+The initial deterministic parser-conflict checks cover mismatched or explicitly negated declaration kinds and explicit denial of a named parser-authoritative direct call; they are not a general natural-language contradiction detector. `ClaimValidator.persist` requires a caller-owned transaction and does not commit it. `AtomicWorkCoordinator.commitAnalysisWorkItem` supplies that transaction and commits evidence, invocation, result revisions, review, event, checkpoint, and work-item cursor together; committed operations are reused on retry.
 
 Initial claim-to-evidence allowlist for WP3:
 
@@ -74,6 +74,13 @@ WP3 test mapping (`mvn -o -q "-Dtest=ClaimValidatorTest" test`; temporary SQLite
 | `marksClaimContradictingParserDeclarationForReview` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | A claim asserting a declaration kind that conflicts with parser authority enters review. |
 | `marksClaimNegatingParserDeclarationForReview` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | A claim denying the parser-authoritative declaration kind enters review. |
 | `marksClaimDenyingParserAuthoritativeCallForReview` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | Explicit denial of a parser-authoritative direct call enters review. |
+
+Runtime transaction integration (`mvn -o -q "-Dtest=AtomicWorkCoordinatorTest" test`; temporary SQLite database):
+
+| Test | File | Behavior verified |
+|---|---|---|
+| `validatedAnalysisCommitsAllArtifactsAndReusesCommittedOperation` | `src/test/java/io/handoff/runtime/AtomicWorkCoordinatorTest.java` | Commits evidence, result, invocation, event, checkpoint, and work status together; validates the event/checkpoint chain and reuses an existing commit on retry. |
+| `failureAfterValidatedResultsRollsBackEvidenceInvocationAndRuntimeArtifacts` | `src/test/java/io/handoff/runtime/AtomicWorkCoordinatorTest.java` | Injected failure after claim persistence rolls back evidence, result, invocation, event, checkpoint, and work status together. |
 
 ### P3-WP4 — Actual local-model and recovery scenario
 
