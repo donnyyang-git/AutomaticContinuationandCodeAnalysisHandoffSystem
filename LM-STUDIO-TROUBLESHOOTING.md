@@ -34,6 +34,80 @@
 | 10 | Java client 改用 HTTP/1.1，`reasoning_effort=none`，512 tokens | Java request 可在約 26 秒收到回覆，但 JSON 在 512-token 上限被截斷，回傳 `E_SCHEMA_INVALID`。這確認傳輸已恢復，需增加 generation budget。 |
 | 11 | Java client 固定 HTTP/1.1、`reasoning_effort=none`、`max_tokens=1024`，evidence 限定於實際宣告/欄位行 | Model A Account/Catalog/Order smoke 均完成 schema validation、invocation/result 持久化、atomic work commit 與 event/checkpoint integrity 驗證。Account 額外注入 `PROCESS_KILL_AFTER_RESULT`，確認所有資料 rollback，再以同一 operation ID 重呼模型並成功提交。 |
 
+## 可重現探測
+
+### 檢查載入模型
+
+```powershell
+curl.exe -sS --max-time 5 http://127.0.0.1:1234/v1/models
+```
+
+結果：HTTP endpoint 迅速回應，清單包含 `qwen/qwen3.5-9b`。此探測只確認模型清單，不測 inference。
+
+### 對照短 completion
+
+使用 PowerShell JSON serializer 避免 `curl.exe -d` quoting 問題：
+
+```powershell
+$body = @{
+	model = 'qwen/qwen3.5-9b'
+	messages = @(@{ role = 'user'; content = 'Reply exactly with OK.' })
+	temperature = 0
+	max_tokens = 512
+	stream = $false
+} | ConvertTo-Json -Depth 6 -Compress
+
+$response = Invoke-RestMethod `
+	-Uri 'http://127.0.0.1:1234/v1/chat/completions' `
+	-Method Post `
+	-ContentType 'application/json' `
+	-Body $body `
+	-TimeoutSec 60
+
+$response.choices[0].message | ConvertTo-Json -Depth 4
+$response.usage | ConvertTo-Json -Depth 4
+```
+
+結果：`finish_reason=stop`，約 6.15 秒，`content` 為 `OK`；同一訊息仍有約 169 個 `reasoning_tokens`。使用 `max_tokens=16` 或 `128` 時，token 幾乎全被 reasoning 使用，`content` 為空且 `finish_reason=length`。
+
+### 確認 reasoning control
+
+用最小 strict schema 對照 `reasoning_effort=none`：
+
+```powershell
+$schema = @{
+	type = 'object'
+	properties = @{ answer = @{ type = 'string' } }
+	required = @('answer')
+	additionalProperties = $false
+}
+$body = @{
+	model = 'qwen/qwen3.5-9b'
+	messages = @(@{ role = 'user'; content = 'Return a JSON object with answer set to OK.' })
+	temperature = 0
+	top_p = 1
+	seed = 42
+	max_tokens = 512
+	reasoning_effort = 'none'
+	stream = $false
+	response_format = @{
+		type = 'json_schema'
+		json_schema = @{ name = 'probe'; strict = $true; schema = $schema }
+	}
+} | ConvertTo-Json -Depth 10 -Compress
+
+Invoke-RestMethod `
+	-Uri 'http://127.0.0.1:1234/v1/chat/completions' `
+	-Method Post `
+	-ContentType 'application/json' `
+	-Body $body `
+	-TimeoutSec 60
+```
+
+結果：約 1.15 秒回覆，`content` 含 JSON、`reasoning_content` 為空、`reasoning_tokens=0`。同一參數搭配完整 `analysis.schema.json` 與短 prompt 約 2.44 秒完成。
+
+完整 Account bounded prompt 加完整 schema 的 PowerShell 對照約 17.73 秒完成並回傳兩個 claims。Java smoke 的成功參數組合是 HTTP/1.1、`reasoning_effort=none`、`max_tokens=1024`；512 tokens 曾在 JSON 尚未完整時以 `E_SCHEMA_INVALID` 結束。
+
 ## 最終有效設定
 
 Java provider 目前採用以下 request 設定：
@@ -75,7 +149,7 @@ mvn -o -q "-Dtest=P3Wp4LocalModelSmokeTest" "-Dhandoff.localModelSmoke=true" tes
 mvn -o -q verify
 ```
 
-最近一次完整 verify：45 個 tests、0 failures、0 errors、1 個預設 skip。三次實際 smoke 耗時：Account recovery 74.61 秒、Catalog 13.12 秒、Order 39.96 秒。
+最近一次完整 verify：45 個 tests、0 failures、0 errors、1 個預設 skip。三次實際 smoke 耗時：Account recovery 74.61 秒、Catalog 13.12 秒、Order 39.96 秒。測試名稱與命令映射見 [POC-3-TESTING.md](POC-3-TESTING.md)。
 
 ## 剩餘範圍
 

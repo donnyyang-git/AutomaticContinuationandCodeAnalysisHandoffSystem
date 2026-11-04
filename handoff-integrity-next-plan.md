@@ -46,6 +46,8 @@
 - 已新增 opt-in P3-WP4 smoke test，使用固定 corpus 的 Account/Catalog/Order 宣告與欄位片段；預設 skip，必須明確啟用才呼叫模型。
 - LM Studio 問題已定位：Qwen3.5 會先把推理輸出到 `reasoning_content`，造成短 token budget 下正文為空或 JSON 截斷。短 probe 證實 `reasoning_effort=none` 可將回答放入 `content`；HTTP/1.1、`reasoning_effort=none`、`max_tokens=1024` 組合下 Account/Catalog/Order 實際 smoke 均成功。
 - Account smoke 亦驗證模型第一次呼叫後的 `PROCESS_KILL_AFTER_RESULT` 注入失敗會 rollback evidence/result/invocation/event/checkpoint，之後同一 operation 重新呼叫模型並成功提交。
+- 完整診斷歷程、probe 命令與回應判讀記錄於 [LM-STUDIO-TROUBLESHOOTING.md](LM-STUDIO-TROUBLESHOOTING.md)；具名測試映射記錄於 [POC-3-TESTING.md](POC-3-TESTING.md)。
+- POC-3 README 已恢復至 manifest 鎖定內容；`python .\specs\validate_specs.py` 回報 `VALID`，execution gate 為 `OPEN`。
 
 ## 四、風險與限制
 
@@ -54,7 +56,7 @@
 - P3-WP1/P3-WP2/P3-WP3 測試使用臨時資料庫或 loopback fixture，沒有修改正式工作 DB，也沒有連接實際模型。
 - P3-WP3 persistence API 由 Runtime 呼叫端管理 transaction；`commitAnalysisWorkItem` 已完成 event/checkpoint/status 接線，但尚未執行實際模型 crash/recovery 情境。
 - 已以故障注入驗證 DB rollback 和同 operation 重試；尚未在模型 inference 進行中強制終止 OS process，也未測試 provider unavailable 後重新啟用的端到端恢復。
-- `create-task` CLI 缺口和 POC-3 final handoff artifact 仍未處理。
+- `create-task` CLI 缺口和 POC-3 final handoff artifact 仍未處理；process-kill 驗證目前使用故障注入，尚未 OS 層級強制 kill。
 
 ## 五、總結
 
@@ -62,8 +64,8 @@
 
 ## 六、本次交接更新
 
-- 交接 ID：`HND-20261105-021435-A7D38E24`
-- 最後更新時間：`2026-11-05T02:14:35+08:00`
+- 交接 ID：`HND-20261105-065328-3C2E8B71`
+- 最後更新時間：`2026-11-05T06:53:28+08:00`
 
 ### 開發歷程
 
@@ -79,3 +81,4 @@
 | 2026-11-05T01:16:31+08:00 | 新增預設 skip 的 P3-WP4 smoke harness；`mvn -o -q verify` 通過（45 tests，0 failures、0 errors、1 skipped）。LM Studio model list 正常，但 chat completion 曾 timeout（約 181 秒、600 秒）；修正 evidence range 後的嘗試因無活動中止，沒有實際 invocation commit。 |
 | 2026-11-05T02:11:27+08:00 | 釐清 Qwen3.5 推理輸出會先佔用 token budget；加入 HTTP/1.1、`reasoning_effort=none`、`max_tokens=1024` 後，Account/Catalog/Order 實際 smoke 通過。Account failure injection 後同 operation retry 成功；`mvn -o -q verify` 通過（45 tests，0 failures、0 errors、1 opt-in smoke skipped）。 |
 | 2026-11-05T02:14:35+08:00 | 確認 Model A 三個 smoke 用例：Account recovery 74.61 s、Catalog 13.12 s、Order 39.96 s；最終 `mvn -o -q verify` 通過（45 tests，0 failures、0 errors、1 opt-in smoke skipped）。LM Studio 無活動的根因為 reasoning channel 消耗輸出預算；HTTP/1.1 + reasoning_effort=none + 1024 token cap 已驗證有效。 |
+| 2026-11-05T06:53:28+08:00 | 撰寫 LM Studio 完整排查記錄與 POC-3 測試映射；恢復 POC-3 README 的 locked 原文，`specs/validate_specs.py` 回報 VALID / execution gate OPEN。完整 smoke 已以 HTTP/1.1、`reasoning_effort=none`、1024-token 上限完成，Account/Catalog/Order 及 Account failure-injection retry 均通過。 |
