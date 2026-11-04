@@ -21,6 +21,7 @@ import java.util.HexFormat;
 
 public final class OpenAiCompatibleAnalysisProvider {
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final int MAX_TOKENS = 1024;
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             .withZone(ZoneOffset.UTC);
@@ -138,7 +139,10 @@ public final class OpenAiCompatibleAnalysisProvider {
     private final HttpClient httpClient;
 
     public OpenAiCompatibleAnalysisProvider() {
-        this(new AnalysisPromptBuilder(), HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build());
+        this(new AnalysisPromptBuilder(), HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .connectTimeout(Duration.ofSeconds(10))
+            .build());
     }
 
     OpenAiCompatibleAnalysisProvider(AnalysisPromptBuilder promptBuilder, HttpClient httpClient) {
@@ -155,7 +159,8 @@ public final class OpenAiCompatibleAnalysisProvider {
         String rawResponse = send(settings, requestUri, requestBody);
         String rawOutput = extractContent(rawResponse);
         JsonNode parsedResponse = parseCompletion(rawOutput);
-        String samplingJson = "{\"seed\":42,\"stream\":false,\"temperature\":0,\"top_p\":1}";
+        String samplingJson = "{\"max_tokens\":1024,\"reasoning_effort\":\"none\",\"seed\":42,"
+            + "\"stream\":false,\"temperature\":0,\"top_p\":1}";
         String promptInput = prompt.systemMessage() + "\n" + prompt.userMessage();
 
         return new Invocation(
@@ -228,6 +233,8 @@ public final class OpenAiCompatibleAnalysisProvider {
             request.put("temperature", 0);
             request.put("top_p", 1);
             request.put("seed", 42);
+            request.put("max_tokens", MAX_TOKENS);
+            request.put("reasoning_effort", "none");
             request.put("stream", false);
             ObjectNode responseFormat = request.putObject("response_format");
             responseFormat.put("type", "json_schema");

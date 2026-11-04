@@ -47,6 +47,8 @@ class OpenAiCompatibleAnalysisProviderTest {
                 assertEquals(0, request.path("temperature").asInt());
                 assertEquals(1, request.path("top_p").asInt());
                 assertEquals(42, request.path("seed").asInt());
+                assertEquals(1024, request.path("max_tokens").asInt());
+                assertEquals("none", request.path("reasoning_effort").asText());
                 assertFalse(request.path("stream").asBoolean());
                 assertEquals("json_schema", request.path("response_format").path("type").asText());
                 assertFalse(requestBody.get().contains("local-secret"));
@@ -54,6 +56,8 @@ class OpenAiCompatibleAnalysisProviderTest {
                 assertEquals(endpoint.toString(), invocation.endpoint());
                 assertEquals("openai-compatible", invocation.apiMode());
                 assertEquals("UNPINNED_MODEL", invocation.modelPinStatus());
+                assertEquals(1024, JSON.readTree(invocation.samplingJson()).path("max_tokens").asInt());
+                assertEquals("none", JSON.readTree(invocation.samplingJson()).path("reasoning_effort").asText());
                 assertEquals(COMPLETION, invocation.rawOutput());
                 assertTrue(invocation.parsedResponse().path("claims").isArray());
                 assertEquals("claim-v1.0.0", invocation.promptVersion());

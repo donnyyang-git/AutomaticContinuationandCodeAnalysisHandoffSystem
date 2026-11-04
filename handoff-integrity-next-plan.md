@@ -37,15 +37,15 @@
 ### Phase 3：正式進入 POC-3
 - P3-WP1 已新增 Evidence Manager：驗證快照成員、來源檔案 hash/size、路徑與行範圍，並以穩定 ID 寫入既有 evidence schema。
 - excerpt 遮蔽 JSON 敏感欄位、Authorization 值、JDBC URL credentials 與 PEM private-key 區塊；測試映射記錄於 `specs/POC-3/README.md`。
-- P3-WP2 已新增 bounded prompt builder 與共用 OpenAI-compatible adapter，支援 Ollama/LM Studio，僅接受 READY manifest 所列 model 與 loopback HTTP endpoint。
+- P3-WP2 已新增 bounded prompt builder 與共用 OpenAI-compatible adapter，支援 Ollama/LM Studio，僅接受 READY manifest 所列 model 與 loopback HTTP endpoint；provider 使用 HTTP/1.1、`reasoning_effort=none`、`max_tokens=1024`。
 - adapter 回傳 invocation metadata、hash、raw completion 與 parsed JSON，不直接寫 DB 或確認分析結果；六個本機 HTTP fixture 測試記錄於 `specs/POC-3/README.md`。
 - P3-WP3 已新增 ClaimValidator：驗證 analysis schema、evidence 的 task/snapshot/hash/range/kind、parser declaration/direct-call 衝突、claim 狀態與 retry revision。
 - invocation、result revision、evidence links 與 review 由呼叫端提供的同一 DB transaction 持久化；ClaimValidator 不自行 commit。12 個 WP3 隔離 DB 測試通過。
 - `AtomicWorkCoordinator.commitAnalysisWorkItem` 已接通 Runtime work-item transaction：同一 commit 包含 evidence、invocation、result/review、event、checkpoint 與 work status/cursor；重試會重用既有 commit。
 - 新增 Runtime 整合測試驗證 commit 後 event/checkpoint integrity、重試冪等，以及注入失敗時整組 rollback；WP3 Runtime 整合測試映射記錄於 `specs/POC-3/README.md`。
 - 已新增 opt-in P3-WP4 smoke test，使用固定 corpus 的 Account/Catalog/Order 宣告與欄位片段；預設 skip，必須明確啟用才呼叫模型。
-- 本機 LM Studio `/v1/models` 可連線，READY manifest 的 Model A `qwen/qwen3.5-9b` 列於載入模型；但 `/v1/chat/completions` 實際嘗試分別在約 181 秒與 600 秒 timeout。使用修正後 evidence range 的嘗試，在約 8 分鐘時因無可見服務活動且 socket 已消失而中止。
-- 尚無實際模型 completion 或 invocation commit；P3-WP4 未驗收，不可把 protocol fixture 測試當成模型 smoke 成功。
+- LM Studio 問題已定位：Qwen3.5 會先把推理輸出到 `reasoning_content`，造成短 token budget 下正文為空或 JSON 截斷。短 probe 證實 `reasoning_effort=none` 可將回答放入 `content`；HTTP/1.1、`reasoning_effort=none`、`max_tokens=1024` 組合下 Account/Catalog/Order 實際 smoke 均成功。
+- Account smoke 亦驗證模型第一次呼叫後的 `PROCESS_KILL_AFTER_RESULT` 注入失敗會 rollback evidence/result/invocation/event/checkpoint，之後同一 operation 重新呼叫模型並成功提交。
 
 ## 四、風險與限制
 
@@ -53,16 +53,17 @@
 - `create-task` CLI 缺口尚未處理；需要 CLI 建立正式 task/snapshot 時，先補齊命令及其測試。
 - P3-WP1/P3-WP2/P3-WP3 測試使用臨時資料庫或 loopback fixture，沒有修改正式工作 DB，也沒有連接實際模型。
 - P3-WP3 persistence API 由 Runtime 呼叫端管理 transaction；`commitAnalysisWorkItem` 已完成 event/checkpoint/status 接線，但尚未執行實際模型 crash/recovery 情境。
-- 實際模型 smoke 受 LM Studio completion 不回應阻塞；需先確認本機服務/模型生成正常後再重跑。完整 crash/recovery orchestration 與 `create-task` CLI 仍未完成。
+- 已以故障注入驗證 DB rollback 和同 operation 重試；尚未在模型 inference 進行中強制終止 OS process，也未測試 provider unavailable 後重新啟用的端到端恢復。
+- `create-task` CLI 缺口和 POC-3 final handoff artifact 仍未處理。
 
 ## 五、總結
 
-本次確認 `work/handoff.db` 只是預設路徑，未發現實際 DB 或 stale checkpoint；resume gate 已由隔離測試覆蓋。P3-WP1/2/3 與 Runtime atomic claim commit 接線已實作；全套離線 verify 為 45 個測試、0 failures/errors、1 個 opt-in smoke 預設 skip。真實模型 completion 尚未成功，P3-WP4 仍受本機 LM Studio 無回應阻塞；CLI `create-task` 與 recovery 情境也保留待辦。
+本次確認 `work/handoff.db` 只是預設路徑，未發現實際 DB 或 stale checkpoint；resume gate 已由隔離測試覆蓋。P3-WP1/2/3、Runtime atomic claim commit 及 Account/Catalog/Order 真實 Model A smoke 已完成；Account failure-injection rollback/retry 亦通過。全套離線 verify 為 45 個測試、0 failures/errors、1 個 opt-in smoke 預設 skip。剩餘待辦為 OS 層級 process-kill/provider-unavailable recovery、POC-3 final handoff artifact 與 `create-task` CLI。
 
 ## 六、本次交接更新
 
-- 交接 ID：`HND-20261105-011631-9F3C72A4`
-- 最後更新時間：`2026-11-05T01:16:31+08:00`
+- 交接 ID：`HND-20261105-021435-A7D38E24`
+- 最後更新時間：`2026-11-05T02:14:35+08:00`
 
 ### 開發歷程
 
@@ -76,3 +77,5 @@
 | 2026-11-05T00:21:13+08:00 | 加入 duplicate logical claim ID 的 preflight rejection，並以 `mvn -o -q verify` 完成最終檢查：42 個測試通過（0 failures、0 errors、0 skipped）。完整 Runtime event/checkpoint 接線和實際模型 smoke 仍待完成。 |
 | 2026-11-05T00:45:32+08:00 | 完成 `commitAnalysisWorkItem` Runtime atomic integration，含 idempotent retry、event/checkpoint integrity 與 rollback 測試；`mvn -o -q verify` 通過（44 個測試，0 failures、0 errors、0 skipped）。本機 LM Studio 已列出 Model A；P3-WP4 實際模型 smoke/恢復情境待執行。 |
 | 2026-11-05T01:16:31+08:00 | 新增預設 skip 的 P3-WP4 smoke harness；`mvn -o -q verify` 通過（45 tests，0 failures、0 errors、1 skipped）。LM Studio model list 正常，但 chat completion 曾 timeout（約 181 秒、600 秒）；修正 evidence range 後的嘗試因無活動中止，沒有實際 invocation commit。 |
+| 2026-11-05T02:11:27+08:00 | 釐清 Qwen3.5 推理輸出會先佔用 token budget；加入 HTTP/1.1、`reasoning_effort=none`、`max_tokens=1024` 後，Account/Catalog/Order 實際 smoke 通過。Account failure injection 後同 operation retry 成功；`mvn -o -q verify` 通過（45 tests，0 failures、0 errors、1 opt-in smoke skipped）。 |
+| 2026-11-05T02:14:35+08:00 | 確認 Model A 三個 smoke 用例：Account recovery 74.61 s、Catalog 13.12 s、Order 39.96 s；最終 `mvn -o -q verify` 通過（45 tests，0 failures、0 errors、1 opt-in smoke skipped）。LM Studio 無活動的根因為 reasoning channel 消耗輸出預算；HTTP/1.1 + reasoning_effort=none + 1024 token cap 已驗證有效。 |

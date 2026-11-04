@@ -34,7 +34,7 @@ WP2 test mapping (`mvn -o -q "-Dtest=OpenAiCompatibleAnalysisProviderTest" test`
 
 | Test | File | Behavior verified |
 |---|---|---|
-| `bothProvidersUseLoopbackChatCompletionsAndReturnParsedJson` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | Ollama and LM Studio use the same `/v1/chat/completions` request, fixed sampling parameters, JSON-schema response format, and parsed completion result. |
+| `bothProvidersUseLoopbackChatCompletionsAndReturnParsedJson` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | Ollama and LM Studio use the same `/v1/chat/completions` request over HTTP/1.1, fixed sampling parameters (`temperature=0`, `top_p=1`, `seed=42`, `max_tokens=1024`, `reasoning_effort=none`), JSON-schema response format, and parsed completion result. |
 | `promptContainsOnlyBoundedContextAndRedactsSecretsAndAbsolutePaths` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | Prompt includes only task, subject, parser facts, evidence excerpts, and schema; absolute paths and secrets are redacted. |
 | `rejectsNonLoopbackEndpointsBeforeSendingRequests` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | Non-loopback or non-HTTP endpoints fail before a provider request is sent. |
 | `rejectsModelsNotListedInTheReadyEnvironmentManifest` | `src/test/java/io/handoff/analysis/OpenAiCompatibleAnalysisProviderTest.java` | A model absent from a READY environment manifest is rejected. |
@@ -90,7 +90,11 @@ Opt-in smoke test mapping (`mvn -o -q "-Dtest=P3Wp4LocalModelSmokeTest" "-Dhando
 
 | Test | File | Behavior verified |
 |---|---|---|
-| `analyzesOneFixedCorpusSubjectWithTheSelectedLocalModel` | `src/test/java/io/handoff/analysis/P3Wp4LocalModelSmokeTest.java` | Uses Model A from the READY environment manifest on a bounded fixed-corpus excerpt, persists the invocation and validated result atomically, and validates the event/checkpoint chain. Defaults to `account`; select `catalog` or `order` with `-Dhandoff.smoke.subject=<name>`. |
+| `analyzesOneFixedCorpusSubjectWithTheSelectedLocalModel` | `src/test/java/io/handoff/analysis/P3Wp4LocalModelSmokeTest.java` | Uses Model A from the READY environment manifest on a bounded fixed-corpus excerpt, persists the invocation and validated result atomically, and validates the event/checkpoint chain. Defaults to `account`; select `catalog` or `order` with `-Dhandoff.smoke.subject=<name>`. For `account`, injects a failure after result persistence, verifies full rollback, re-invokes the model under the same operation, and commits successfully. |
+
+Verified with Model A `qwen/qwen3.5-9b`: Account recovery run 74.61 s, Catalog 13.12 s, and Order 39.96 s. Commands use `-Dhandoff.localModelSmoke=true`; append `-Dhandoff.smoke.subject=catalog` or `order` for those subjects. Default `mvn -o -q verify` skips this opt-in test.
+
+Verified locally with `qwen/qwen3.5-9b`: `account` (recovery path, 74.61 s), `catalog` (13.12 s), and `order` (39.96 s) each completed with the command above; add `-Dhandoff.smoke.subject=catalog` or `-Dhandoff.smoke.subject=order` for the latter runs. The default `mvn -o -q verify` skips this opt-in test.
 
 ## Acceptance
 

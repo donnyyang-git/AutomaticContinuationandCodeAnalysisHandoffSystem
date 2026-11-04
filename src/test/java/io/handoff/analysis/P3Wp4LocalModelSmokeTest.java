@@ -3,6 +3,7 @@ package io.handoff.analysis;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +11,7 @@ import io.handoff.evidence.EvidenceManager;
 import io.handoff.persistence.ConnectionFactory;
 import io.handoff.persistence.SchemaBootstrapper;
 import io.handoff.runtime.AtomicWorkCoordinator;
+import io.handoff.runtime.FailureInjection;
 import io.handoff.runtime.IntegrityValidator;
 import io.handoff.runtime.TaskRuntime;
 import io.handoff.runtime.TaskState;
@@ -81,15 +83,35 @@ class P3Wp4LocalModelSmokeTest {
             assertFalse(invocation.parsedResponse().path("claims").isEmpty(),
                     "Local model must return at least one structured claim");
 
-            var committed = new AtomicWorkCoordinator(connection).commitAnalysisWorkItem(
+            AtomicWorkCoordinator coordinator = new AtomicWorkCoordinator(connection);
+            List<ClaimValidator.ParserFact> parserFacts =
+                    List.of(new ClaimValidator.ParserFact("DECLARATION", subject.qualifiedName(), "CLASS"));
+            if ("account".equals(subject.name())) {
+                OpenAiCompatibleAnalysisProvider.Invocation failedInvocation = invocation;
+                assertThrows(io.handoff.runtime.InjectedFailureException.class,
+                        () -> coordinator.commitAnalysisWorkItem(
+                                TASK_ID, OPERATION_ID, FailureInjection.PROCESS_KILL_AFTER_RESULT,
+                                List.of(evidence), sourceRoot, failedInvocation, schema, parserFacts));
+                assertEquals(1, count(connection,
+                        "SELECT COUNT(*) FROM work_item WHERE operation_id=? AND status='PENDING'", OPERATION_ID));
+                assertEquals(0, count(connection, "SELECT COUNT(*) FROM evidence"));
+                assertEquals(0, count(connection, "SELECT COUNT(*) FROM analysis_result"));
+                assertEquals(0, count(connection, "SELECT COUNT(*) FROM model_invocation"));
+                assertEquals(0, count(connection, "SELECT COUNT(*) FROM execution_event"));
+                assertEquals(0, count(connection, "SELECT COUNT(*) FROM checkpoint"));
+                invocation = new OpenAiCompatibleAnalysisProvider().analyze(
+                        settings, promptInput, JSON.readTree(schema));
+            }
+
+            var committed = coordinator.commitAnalysisWorkItem(
                     TASK_ID,
                     OPERATION_ID,
-                    io.handoff.runtime.FailureInjection.NONE,
+                    FailureInjection.NONE,
                     List.of(evidence),
                     sourceRoot,
                     invocation,
                     schema,
-                    List.of(new ClaimValidator.ParserFact("DECLARATION", subject.qualifiedName(), "CLASS")));
+                    parserFacts);
 
             assertFalse(committed.claims().isEmpty());
             assertEquals(1, count(connection, "SELECT COUNT(*) FROM model_invocation"));
@@ -133,13 +155,13 @@ class P3Wp4LocalModelSmokeTest {
     }
 
     private static int count(Connection connection, String sql) throws Exception {
-                return count(connection, sql, null);
-        }
+        return count(connection, sql, null);
+    }
 
-        private static int count(Connection connection, String sql, String parameter) throws Exception {
+    private static int count(Connection connection, String sql, String parameter) throws Exception {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                        if (parameter != null) {
-                                statement.setString(1, parameter);
+            if (parameter != null) {
+                statement.setString(1, parameter);
             }
             try (var result = statement.executeQuery()) {
                 result.next();
