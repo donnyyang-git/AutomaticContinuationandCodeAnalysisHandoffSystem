@@ -101,6 +101,34 @@ public final class EvidenceManager {
         return findEvidence(evidenceId);
     }
 
+    public Evidence validateEvidence(String taskId, String evidenceId) throws SQLException, RuntimeException {
+        Evidence evidence = findEvidence(evidenceId);
+        String currentSnapshot = taskSnapshot(taskId);
+        if (!taskId.equals(evidence.taskId()) || !currentSnapshot.equals(evidence.snapshotId())
+                || !("VALID".equals(evidence.status()) || "REDACTED".equals(evidence.status()))) {
+            throw invalidEvidence("Evidence does not belong to the current task snapshot");
+        }
+
+        SnapshotFile snapshotFile = snapshotFile(currentSnapshot, evidence.path());
+        byte[] fileBytes = readSnapshotFile(evidence.path());
+        if (fileBytes.length != snapshotFile.sizeBytes()
+                || !sha256(fileBytes).equals(snapshotFile.sha256())) {
+            throw invalidEvidence("Source file does not match the immutable snapshot");
+        }
+        String content = decodeUtf8(fileBytes);
+        LineSpan span = lineSpan(content, evidence.startLine(), evidence.endLine());
+        String range = content.substring(span.startOffset(), span.endOffset());
+        String contentSha256 = sha256(range.getBytes(StandardCharsets.UTF_8));
+        String expectedExcerpt = redact(range);
+        String expectedStatus = expectedExcerpt.equals(range) ? "VALID" : "REDACTED";
+        if (!contentSha256.equals(evidence.contentSha256())
+                || !expectedExcerpt.equals(evidence.redactedExcerpt())
+                || !expectedStatus.equals(evidence.status())) {
+            throw invalidEvidence("Evidence range hash or stored excerpt is invalid");
+        }
+        return evidence;
+    }
+
     private String taskSnapshot(String taskId) throws SQLException, RuntimeException {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT snapshot_id FROM task_state WHERE task_id=?")) {

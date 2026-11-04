@@ -47,6 +47,34 @@ Validate `analysis.schema.json`, evidence existence/snapshot/range/hash, allowed
 
 A retry yielding a materially different normalized claim appends a `CONFLICTING` revision and opens review; it never replaces the earlier revision or auto-selects one.
 
+The initial deterministic parser-conflict checks cover mismatched or explicitly negated declaration kinds and explicit denial of a named parser-authoritative direct call; they are not a general natural-language contradiction detector. `ClaimValidator.persist` requires a caller-owned transaction and does not commit it.
+
+Initial claim-to-evidence allowlist for WP3:
+
+| Claim type | Allowed evidence kinds |
+|---|---|
+| `ARCHITECTURE`, `RESPONSIBILITY`, `ENTRY_POINT` | `SOURCE_RANGE`, `DECLARATION`, `SYMBOL` |
+| `DATA_FLOW` | `SOURCE_RANGE`, `DIRECT_CALL` |
+| `CALL_RELATIONSHIP_INTERPRETATION` | `DIRECT_CALL`, `SOURCE_RANGE` |
+| `RISK` | `SOURCE_RANGE`, `DIRECT_CALL`, `XML_MAPS`, `VIEW_ENTRY` |
+
+WP3 test mapping (`mvn -o -q "-Dtest=ClaimValidatorTest" test`; temporary SQLite database):
+
+| Test | File | Behavior verified |
+|---|---|---|
+| `persistsValidatedClaimAndInvocationWithinCallerTransaction` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | Persists a valid claim, invocation, and evidence link within the caller transaction; rollback removes all writes; stored output is redacted and its hash matches. |
+| `downgradesConfirmedClaimWithoutEvidenceAndOpensReview` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | A `CONFIRMED` claim without evidence is stored as `UNSUPPORTED` and opens review. |
+| `persistsInferredClaimWithReasonAndEvidence` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | An `INFERRED` claim retains its explicit reason and valid evidence link. |
+| `rejectsInferredClaimWithoutExplicitReason` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | An `INFERRED` claim with an empty reason is rejected before result persistence. |
+| `materiallyDifferentRetryAppendsConflictingRevisionAndOpensReview` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | A materially different retry appends revision 2 as `CONFLICTING` and opens review without overwriting revision 1. |
+| `rejectsEvidenceKindNotAllowedForClaimType` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | A claim using an evidence kind outside the allowlist is rejected before result persistence. |
+| `rejectsMalformedResponseWithoutWritingResults` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | Schema-invalid output is rejected without persisting result or invocation rows. |
+| `rejectsDuplicateLogicalClaimIdsBeforeWritingAnyRows` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | Duplicate logical claim IDs are rejected before invocation or result rows are written. |
+| `rejectsEvidenceFromAnotherTaskSnapshotWithoutWritingResults` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | Missing or wrong-snapshot evidence is rejected before persistence. |
+| `marksClaimContradictingParserDeclarationForReview` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | A claim asserting a declaration kind that conflicts with parser authority enters review. |
+| `marksClaimNegatingParserDeclarationForReview` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | A claim denying the parser-authoritative declaration kind enters review. |
+| `marksClaimDenyingParserAuthoritativeCallForReview` | `src/test/java/io/handoff/analysis/ClaimValidatorTest.java` | Explicit denial of a parser-authoritative direct call enters review. |
+
 ### P3-WP4 — Actual local-model and recovery scenario
 
 Run at least one account, catalog, and order analysis work item through the selected local provider using Model A. Kill during one invocation. If no committed invocation/result exists, retry under same operation; if committed, reuse. A selected provider unavailable exits 40 with `E_LLM_UNAVAILABLE` and preserves committed work. Re-enable the provider and resume.

@@ -22,7 +22,7 @@
 - `work/handoff.db` 是 CLI 預設路徑，但目前工作區不存在此檔案，兩個遠端分支也沒有此資料庫；因此尚無證據顯示有 stale checkpoint。
 - 工作區另一個 `work/handoffs/POC-0-WP2/handoff-startup.db` 沒有 checkpoint rows，不能代替 `work/handoff.db`。
 - `HandoffCommand` 尚未提供 `create-task` 子命令；此 CLI 缺口本次明確記為未處理，不阻擋 P3-WP1。
-- POC-2 handoff 為 accepted；P3-WP1 Evidence Manager 與 P3-WP2 local LLM adapter/prompt builder 已完成本次實作。
+- POC-2 handoff 為 accepted；P3-WP1 Evidence Manager、P3-WP2 local LLM adapter/prompt builder 與 P3-WP3 ClaimValidator persistence slice 已完成本次實作。
 
 ## 三、接下來的計畫
 
@@ -39,23 +39,26 @@
 - excerpt 遮蔽 JSON 敏感欄位、Authorization 值、JDBC URL credentials 與 PEM private-key 區塊；測試映射記錄於 `specs/POC-3/README.md`。
 - P3-WP2 已新增 bounded prompt builder 與共用 OpenAI-compatible adapter，支援 Ollama/LM Studio，僅接受 READY manifest 所列 model 與 loopback HTTP endpoint。
 - adapter 回傳 invocation metadata、hash、raw completion 與 parsed JSON，不直接寫 DB 或確認分析結果；六個本機 HTTP fixture 測試記錄於 `specs/POC-3/README.md`。
-- 下一步可進入 P3-WP3 Claim Validator；實際模型 smoke 與 invocation persistence 尚未執行/實作。
+- P3-WP3 已新增 ClaimValidator：驗證 analysis schema、evidence 的 task/snapshot/hash/range/kind、parser declaration/direct-call 衝突、claim 狀態與 retry revision。
+- invocation、result revision、evidence links 與 review 由呼叫端提供的同一 DB transaction 持久化；ClaimValidator 不自行 commit。12 個 WP3 隔離 DB 測試通過。
+- 下一步先將 ClaimValidator 接入完整 Runtime work-item transaction（event、work status/cursor、checkpoint），再進入 P3-WP4 實際模型與恢復情境。
 
 ## 四、風險與限制
 
 - 本次未取得或檢查任何舊環境的 `work/handoff.db`；不得推論其內容或狀態。
 - `create-task` CLI 缺口尚未處理；需要 CLI 建立正式 task/snapshot 時，先補齊命令及其測試。
-- P3-WP1/P3-WP2 測試使用臨時資料庫或 loopback fixture，沒有修改正式工作 DB，也沒有連接實際模型。
-- 尚未完成實際模型 smoke、model invocation 的 SQLite persistence、POC-3 WP3 claim validation。
+- P3-WP1/P3-WP2/P3-WP3 測試使用臨時資料庫或 loopback fixture，沒有修改正式工作 DB，也沒有連接實際模型。
+- P3-WP3 尚未接入完整 work-item event/checkpoint/status 更新；目前 persistence API 要求由 Runtime 呼叫端提供 transaction。
+- 尚未完成實際模型 smoke、完整 Runtime recovery orchestration 與 `create-task` CLI。
 
 ## 五、總結
 
-本次確認 `work/handoff.db` 只是預設路徑，未發現實際 DB 或 stale checkpoint；resume gate 已由隔離測試覆蓋。P3-WP1 Evidence Manager 與 P3-WP2 provider/prompt 切片已完成 fixture 測試；全套 29 個 Maven 測試通過。CLI `create-task`、真實模型 smoke、invocation persistence 與 WP3 claim validation 保留待辦。
+本次確認 `work/handoff.db` 只是預設路徑，未發現實際 DB 或 stale checkpoint；resume gate 已由隔離測試覆蓋。P3-WP1/2/3 的 Evidence Manager、provider/prompt 與 claim persistence slices 已實作；全套離線 verify 為 42 個測試通過。CLI `create-task`、完整 Runtime event/checkpoint 接線、真實模型 smoke 與恢復情境保留待辦。
 
 ## 六、本次交接更新
 
-- 交接 ID：`HND-20261104-225750-6E2C91AF`
-- 最後更新時間：`2026-11-04T22:57:50+08:00`
+- 交接 ID：`HND-20261105-002113-8C45A731`
+- 最後更新時間：`2026-11-05T00:21:13+08:00`
 
 ### 開發歷程
 
@@ -65,3 +68,5 @@
 | 2026-11-04T22:54:53+08:00 | 完成 P3-WP2 prompt/provider fixture slice；兩種 provider 共用 loopback OpenAI-compatible request，manifest gate 與 prompt redaction 通過；全套 28 個 Maven 測試通過（0 failures、0 errors、0 skipped）。真實模型 smoke、invocation DB persistence、WP3 與 `create-task` 尚未完成。 |
 | 2026-11-04T22:56:29+08:00 | 加入 provider HTTP 503 與 missing-model 錯誤映射測試；最終全套離線測試 29 個通過（0 failures、0 errors、0 skipped）。 |
 | 2026-11-04T22:57:50+08:00 | 修正 WP2 測試使用的 JSON Schema fixture；重跑 `mvn -o -q test`，29 個測試通過（0 failures、0 errors、0 skipped）。 |
+| 2026-11-05T00:17:11+08:00 | 完成 P3-WP3 claim validation/persistence slice 與測試；`mvn -o -q verify` 通過，41 個測試（0 failures、0 errors、0 skipped）。完整 Runtime event/checkpoint 接線和實際模型 smoke 尚未完成。 |
+| 2026-11-05T00:21:13+08:00 | 加入 duplicate logical claim ID 的 preflight rejection，並以 `mvn -o -q verify` 完成最終檢查：42 個測試通過（0 failures、0 errors、0 skipped）。完整 Runtime event/checkpoint 接線和實際模型 smoke 仍待完成。 |

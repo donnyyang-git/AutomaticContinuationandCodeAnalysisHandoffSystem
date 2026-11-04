@@ -90,6 +90,10 @@ public final class AnalysisPromptBuilder {
         }
     }
 
+    public static String redactSensitiveContent(String value) {
+        return sanitize(value);
+    }
+
     private static String systemMessage() {
         return "Analyze only the supplied task, subject, authoritative parser facts, and bounded evidence. "
                 + "Parser facts are authoritative and must not be contradicted. Do not infer facts beyond the "

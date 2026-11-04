@@ -82,6 +82,23 @@ class EvidenceManagerTest {
     }
 
     @Test
+    void revalidationRejectsEvidenceAfterSourceChanges() throws Exception {
+        byte[] fileBytes = "class Example {}\n".getBytes(StandardCharsets.UTF_8);
+        Path sourceRoot = writeSource(fileBytes);
+
+        try (Connection connection = openDatabase(fileBytes)) {
+            EvidenceManager manager = new EvidenceManager(connection, sourceRoot);
+            EvidenceManager.Evidence evidence = manager.createEvidence(TASK, "SOURCE_RANGE", FILE_PATH, 1, 1);
+            Files.writeString(sourceRoot.resolve(FILE_PATH), "class Changed {}\n", StandardCharsets.UTF_8);
+
+            RuntimeException failure = assertThrows(RuntimeException.class,
+                    () -> manager.validateEvidence(TASK, evidence.evidenceId()));
+
+            assertEquals("E_EVIDENCE_INVALID", failure.code());
+        }
+    }
+
+    @Test
     void rejectsUnlistedFilesAndInvalidInclusiveRanges() throws Exception {
         byte[] fileBytes = "class Example {}\n".getBytes(StandardCharsets.UTF_8);
         Path sourceRoot = writeSource(fileBytes);
